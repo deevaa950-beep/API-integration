@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a1111" />
+    <meta name="description" content="Справочник по подключению AI-инструментов через api.aikeysforyou.com" />
+    <title>Aikeys Docs — подключение AI-инструментов</title>
+    <link id="site-favicon" rel="icon" href="./site-icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#setup">Перейти к инструкции</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Aikeys Docs — на главную">
+        <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true">
+          <path d="M18 3.5 30.5 11v14L18 32.5 5.5 25V11L18 3.5Z" fill="none" stroke="currentColor" stroke-width="2.2" />
+          <path d="m12.2 18 3.8 3.8 7.8-8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" />
+        </svg>
+        <span>Aikeys <b>Docs</b></span>
+      </a>
+      <nav class="main-nav" aria-label="Основная навигация">
+        <a href="#setup">Подключение</a>
+        <a href="#models">Модели</a>
+        <a href="#savings">Советы</a>
+        <a href="#errors">Ошибки</a>
+      </nav>
+      <a class="header-link" href="#setup">Открыть инструкцию <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="top">
+      <section class="hero section-shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="pulse-dot"></span> Справочник по подключению</p>
+          <h1 id="hero-title">Подключайте AI-инструменты <em>уверенно.</em></h1>
+          <p class="hero-lede">Пошаговые настройки для рабочих приложений, актуальные ID моделей и понятные решения ошибок — в одном месте.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#setup">Выбрать программу <span aria-hidden="true">↓</span></a>
+            <a class="button button-quiet" href="#errors">Найти решение</a>
+          </div>
+        </div>
+        <aside class="gateway-card" aria-label="Адрес API-шлюза">
+          <div class="gateway-card__header">
+            <span class="status-lamp"></span>
+            <span>Ваш API-шлюз</span>
+          </div>
+          <code id="gateway-url">https://api.aikeysforyou.com</code>
+          <button class="copy-line" type="button" data-copy-target="#gateway-url">
+            <span>Скопировать адрес</span><span class="copy-icon" aria-hidden="true">⧉</span>
+          </button>
+          <p>Ключ вводится только в вашем приложении — этот сайт его не сохраняет.</p>
+        </aside>
+      </section>
+
+      <section class="trust-strip" aria-label="Преимущества справочника">
+        <div><span class="trust-index">01</span><p>Настройки для Windows, macOS и Linux</p></div>
+        <div><span class="trust-index">02</span><p>Каталог ID моделей и версий</p></div>
+        <div><span class="trust-index">03</span><p>База частых ошибок без лишнего шума</p></div>
+      </section>
+
+      <section class="section-shell setup-section" id="setup" aria-labelledby="setup-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">01 · Подключение</p>
+            <h2 id="setup-title">Выберите, что настраиваете</h2>
+          </div>
+          <p class="section-note" id="catalog-status" aria-live="polite">Загружаем каталог…</p>
+        </div>
+
+        <div class="setup-controls">
+          <div class="control-group control-group--wide">
+            <span class="control-label">Программа</span>
+            <div class="app-tabs" id="app-tabs" role="tablist" aria-label="Выбор программы"></div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Система</span>
+            <div class="segment-tabs" id="os-tabs" role="tablist" aria-label="Выбор системы"></div>
+          </div>
+        </div>
+
+        <div class="key-notice">
+          <div class="key-notice__icon" aria-hidden="true">⌁</div>
+          <div>
+            <strong>Хотите увидеть готовый пример?</strong>
+            <p>Вставьте ключ только для локального предпросмотра. Он не отправляется на сервер и исчезнет после обновления страницы.</p>
+          </div>
+          <label class="key-field">
+            <span class="sr-only">API-ключ для локального предпросмотра</span>
+            <input id="api-key" type="password" autocomplete="off" placeholder="Вставить API-ключ" />
+            <button type="button" class="eye-button" id="toggle-key" aria-label="Показать ключ">◉</button>
+          </label>
+        </div>
+
+        <article class="guide-card" id="guide-card" aria-live="polite"></article>
+      </section>
+
+      <section class="section-shell models-section" id="models" aria-labelledby="models-title">
+        <div class="section-heading section-heading--models">
+          <div>
+            <p class="eyebrow">02 · Каталог</p>
+            <h2 id="models-title">Модели и версии</h2>
+          </div>
+          <label class="model-search">
+            <span class="search-symbol" aria-hidden="true">⌕</span>
+            <span class="sr-only">Поиск модели</span>
+            <input id="model-search" type="search" placeholder="Найти по имени или ID" />
+          </label>
+        </div>
+        <p class="models-intro">Используйте точный <b>Model ID</b> в настройках клиента. Каталог не показывает цены или баланс — только совместимые модели и их назначение.</p>
+        <div class="models-filter" id="models-filter" aria-label="Фильтр по типу моделей"></div>
+        <div class="models-grid" id="models-grid"></div>
+        <p class="empty-state" id="models-empty" hidden>По этому запросу моделей не нашлось. Попробуйте другое имя или ID.</p>
+      </section>
+
+      <section class="section-shell savings-section" id="savings" aria-labelledby="savings-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">03 · Советы</p>
+            <h2 id="savings-title">Как тратить меньше</h2>
+          </div>
+          <p class="section-note" id="savings-intro">Несколько простых настроек помогают не расходовать контекст впустую.</p>
+        </div>
+        <div class="savings-grid" id="savings-list"></div>
+      </section>
+
+      <section class="section-shell errors-section" id="errors" aria-labelledby="errors-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">04 · Диагностика</p>
+            <h2 id="errors-title">Если что-то пошло не так</h2>
+          </div>
+          <p class="section-note">Откройте карточку с похожей ошибкой и идите по чек-листу.</p>
+        </div>
+        <div class="errors-layout">
+          <div class="error-helper">
+            <span class="helper-symbol" aria-hidden="true">?</span>
+            <h3>С чего начать</h3>
+            <p>В большинстве случаев проблема решается проверкой трёх вещей: ключа, адреса шлюза и точного ID модели.</p>
+            <a href="#setup">Вернуться к настройке <span aria-hidden="true">↑</span></a>
+          </div>
+          <div class="error-list" id="error-list"></div>
+        </div>
+      </section>
+
+      <section class="section-shell safety-callout" aria-label="Важно о безопасности ключа">
+        <span class="safety-icon" aria-hidden="true">✦</span>
+        <div>
+          <h2>Ключ — только для вашего клиента</h2>
+          <p>Не отправляйте API-ключ в чат, на скриншоты и в репозиторий. Добавляйте файлы конфигурации с ключом в <code>.gitignore</code>.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="brand" href="#top" aria-label="Aikeys Docs — наверх">
+        <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true"><path d="M18 3.5 30.5 11v14L18 32.5 5.5 25V11L18 3.5Z" fill="none" stroke="currentColor" stroke-width="2.2" /><path d="m12.2 18 3.8 3.8 7.8-8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" /></svg>
+        <span>Aikeys <b>Docs</b></span>
+      </a>
+      <p>Справочник по подключению · <span id="footer-updated">обновляем каталог</span></p>
+      <a href="#top">Наверх ↑</a>
+    </footer>
+
+    <template id="loading-guide">
+      <div class="guide-loading"><span></span><span></span><span></span></div>
+    </template>
+    <script src="./site-config.js"></script>
+    <script src="./catalog-seed.js"></script>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
