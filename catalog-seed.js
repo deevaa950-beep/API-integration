@@ -453,6 +453,42 @@ window.__AIKEYS_CATALOG__ = {
         },
         {
           "t": {
+            "ru": "Только для Cline: поправить настройки модели",
+            "en": "Cline only: fix the model settings"
+          },
+          "p": {
+            "ru": "Этот шаг нужен именно в Cline — в Roo Code и Kilo Code экран другой, и если таких полей нет, шаг пропускайте. Разверните Model Configuration и выставьте эти значения. Без этого первый же запрос отобьётся ошибкой pre_consume_token_quota_failed: Cline резервирует под ответ столько токенов, сколько указано в Max Output Tokens, умноженных на ставку модели.",
+            "en": "This step is for Cline only — Roo Code and Kilo Code have a different screen; if these fields are missing, skip it. Expand Model Configuration and set these values. Without it the very first request fails with pre_consume_token_quota_failed: Cline reserves as many tokens as Max Output Tokens says, multiplied by the model rate."
+          },
+          "fields": [
+            [
+              "Context Window Size",
+              "256000"
+            ],
+            [
+              "Max Output Tokens",
+              "8192"
+            ],
+            [
+              "Input Price / 1M",
+              "0"
+            ],
+            [
+              "Output Price / 1M",
+              "0"
+            ],
+            [
+              "Reasoning Effort",
+              "Low"
+            ]
+          ],
+          "tip": {
+            "ru": "Главный виновник — Max Output Tokens. При значении 1000000 расширение просит зарезервировать миллион токенов ответа: на ключе с миллионом единиц не хватит даже на один запрос. 8192 хватает на любой ответ с кодом. Цены оставьте нулями — точный расход в рублях виден в кабинете.",
+            "en": "The culprit is Max Output Tokens. At 1000000 the extension asks to reserve a million output tokens: a one-million key will not cover a single request. 8192 is plenty for any code answer. Leave the prices at zero — the real spend in roubles is in your dashboard."
+          }
+        },
+        {
+          "t": {
             "ru": "Проверить",
             "en": "Check"
           },
@@ -535,6 +571,10 @@ window.__AIKEYS_CATALOG__ = {
         {
           "ru": "Честно и сразу: Cursor принимает чужой ключ только для чата. Автодополнение по Tab и часть агентских функций всегда идут через серверы самого Cursor — это его ограничение, не наше, и написано в его же документации.",
           "en": "Straight talk: Cursor accepts an external key for chat only. Tab completion and some agent features always go through Cursor's own servers — their limitation, not ours, and it is stated in their docs."
+        },
+        {
+          "ru": "Пишет «Named models unavailable — Free plans can only use Auto»? Это бесплатный тариф Cursor: он не пускает выбранные модели даже со своим ключом, до нас запрос не доходит. Обход внутри того же Cursor — расширение Cline или Roo Code (Ctrl+Shift+X), провайдер OpenAI Compatible, наш адрес и ключ, модель вписать вручную — по соседнему рецепту «Cline · Roo · Kilo».",
+          "en": "Seeing “Named models unavailable — Free plans can only use Auto”? That is Cursor's free plan: it blocks picked models even with your own key, the request never reaches us. Workaround inside the same Cursor — the Cline or Roo Code extension (Ctrl+Shift+X), provider OpenAI Compatible, our address and key, type the model name by hand — see the “Cline · Roo · Kilo” recipe."
         },
         {
           "ru": "Переключателя адреса в вашей версии нет? Поставьте прямо в Cursor расширение Cline или Roo Code и настройте по соседнему рецепту: Cursor — форк VS Code, расширения там работают.",
@@ -640,6 +680,21 @@ window.__AIKEYS_CATALOG__ = {
         },
         {
           "t": {
+            "ru": "Вставить настройки",
+            "en": "Paste the settings"
+          },
+          "p": {
+            "ru": "Сначала впишите свой ключ в поле «Ваш ключ» вверху — он подставится в блок сам. Потом вставьте блок в открывшийся файл и сохраните: Ctrl+S, на маке ⌘S, в nano — Ctrl+O, Enter, Ctrl+X. Имя aikeys не меняйте.",
+            "en": "First put your key into the “Your key” field above — it fills the block in for you. Then paste the block into the open file and save: Ctrl+S, ⌘S on a Mac, Ctrl+O, Enter, Ctrl+X in nano. Keep the id aikeys."
+          },
+          "code": "{\n  \"provider\": {\n    \"aikeys\": {\n      \"npm\": \"@ai-sdk/openai-compatible\",\n      \"name\": \"Aikeys\",\n      \"options\": { \"baseURL\": \"https://api.aikeysforyou.com/v1\", \"apiKey\": \"{{KEY}}\" },\n      \"models\": {\n        \"claude-haiku-4-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-opus-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-sonnet-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-fable-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-5.6-sol\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-astra\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-sol\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-luna\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-5.6-terra\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gemini-3.1-pro\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"gemini-3.7-flash\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"gemini-3.8-flash\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"deepseek-v4-pro\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 128000, \"output\": 8192 } },\n        \"gpt-5.6-luna\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } }\n      }\n    }\n  }\n}",
+          "tip": {
+            "ru": "Видите в блоке sk-ВАШ_КЛЮЧ — ключ ещё не вписан вверху. Файл не пустой — OpenCode уже настроен: сохраните копию и допишите только блок provider, два объекта подряд сломают конфиг. Нужна другая модель — допишите такой же строкой, имена в разделе «Модели» на tokenwave.ru. Значение output выше 8192 не ставьте: шлюз резервирует ответ заранее, и на остатке пакета это даёт отказ.",
+            "en": "If the block shows sk-YOUR_KEY, the key is not entered above yet. File not empty — OpenCode is already set up: keep a copy and add only the provider block; two objects in a row break it. Need another model — add it as one more line, names are under Models on tokenwave.ru. Do not raise output above 8192: the gateway reserves the answer up front, and near the end of a package that turns into a refusal."
+          }
+        },
+        {
+          "t": {
             "ru": "Проверить и работать",
             "en": "Check it and go"
           },
@@ -654,7 +709,16 @@ window.__AIKEYS_CATALOG__ = {
           }
         }
       ],
-      "after": []
+      "after": [
+        {
+          "ru": "OpenCode тратит больше, чем кажется: один короткий вопрос — четыре обращения и 7392 токена. Множитель расхода у моделей разный: gpt-5.6-luna ×1,3, deepseek-v4-pro ×1,4, claude-haiku-4-5 ×1,4, claude-opus-5 ×4 — на Opus тот же вопрос снимает в разы больше.",
+          "en": "OpenCode spends more than it looks: one short question meant four calls and 7392 tokens. Models burn at different rates: gpt-5.6-luna ×1.3, deepseek-v4-pro ×1.4, claude-haiku-4-5 ×1.4, claude-opus-5 ×4 — on Opus the same question eats several times more."
+        },
+        {
+          "ru": "Имена моделей и множители — на tokenwave.ru, раздел «Модели». Остаток и расход — в кабинете panel.tokenwave.ru. Размышлений (thinking) и кэша промптов у Claude через нас нет.",
+          "en": "Model names and multipliers: tokenwave.ru, Models. Balance and spend: panel.tokenwave.ru. Claude's extended thinking and prompt cache are not available through us."
+        }
+      ]
     },
     "aider": {
       "intro": {
@@ -765,8 +829,8 @@ window.__AIKEYS_CATALOG__ = {
     },
     "chat": {
       "intro": {
-        "ru": "Подключение через единый API-шлюз: укажите адрес, ключ и поддерживаемую модель.",
-        "en": "Connect through the unified API gateway: set the URL, key and a supported model."
+        "ru": "Обычные чаты с ИИ — без агентов и работы с файлами. Самый дешёвый способ расходовать пакет.",
+        "en": "Plain AI chats — no agents, no file editing. The cheapest way to spend your pack."
       },
       "steps": [
         {
@@ -919,14 +983,24 @@ window.__AIKEYS_CATALOG__ = {
             "mac": "curl https://api.aikeysforyou.com/v1/images/generations \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\", \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}' \\\n  | python3 -c \"import sys, json, base64; open('image.png', 'wb').write(base64.b64decode(json.load(sys.stdin)['data'][0]['b64_json']))\"",
             "linux": "curl https://api.aikeysforyou.com/v1/images/generations \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\", \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}' \\\n  | python3 -c \"import sys, json, base64; open('image.png', 'wb').write(base64.b64decode(json.load(sys.stdin)['data'][0]['b64_json']))\""
           }
+        },
+        {
+          "t": {
+            "ru": "Сколько списывается",
+            "en": "What it costs"
+          },
+          "p": {
+            "ru": "Цены за одну картинку по каждой модели и качеству — в блоке «Картинки» на главной. n=2 списывает вдвое, n=4 — вчетверо. Редактирование готовых картинок (edits) и видео пока не подключены.",
+            "en": "Per-image prices for every model and quality are in the “Images” block on the home page. n=2 charges twice, n=4 four times. Editing existing images (edits) and video are not available yet."
+          }
         }
       ],
       "after": []
     },
     "audio": {
       "intro": {
-        "ru": "Подключение через единый API-шлюз: укажите адрес, ключ и поддерживаемую модель.",
-        "en": "Connect through the unified API gateway: set the URL, key and a supported model."
+        "ru": "Голосовые и записи — в текст тем же ключом. Формат файла любой (mp3, m4a, ogg, wav, webm), конвертируем сами. Цена — за минуту записи, до 15 минут за запрос.",
+        "en": "Voice messages and recordings to text with the same key. Any file format (mp3, m4a, ogg, wav, webm), we convert it ourselves. Priced per minute of audio, up to 15 minutes per request."
       },
       "steps": [
         {
@@ -977,16 +1051,82 @@ window.__AIKEYS_CATALOG__ = {
             "mac": "curl https://api.aikeysforyou.com/v1/audio/transcriptions \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -F model=gpt-4o-transcribe \\\n  -F language=ru \\\n  -F file=@voice.m4a",
             "linux": "curl https://api.aikeysforyou.com/v1/audio/transcriptions \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -F model=gpt-4o-transcribe \\\n  -F language=ru \\\n  -F file=@voice.m4a"
           }
+        },
+        {
+          "t": {
+            "ru": "Сколько списывается",
+            "en": "What it costs"
+          },
+          "p": {
+            "ru": "Списание — за каждую начатую минуту записи, цена в блоке «Картинки и речь» на главной. Записи длиннее 15 минут режьте на части.",
+            "en": "Charged per started minute of audio; the price is in the “Images and speech” block on the home page. Split recordings longer than 15 minutes."
+          }
         }
       ],
       "after": []
     },
     "video": {
       "intro": {
-        "ru": "Подключение через единый API-шлюз: укажите адрес, ключ и поддерживаемую модель.",
-        "en": "Connect through the unified API gateway: set the URL, key and a supported model."
+        "ru": "Короткие ролики 1–15 секунд тем же ключом. Задача создаётся мгновенно, готовое видео обычно через 10–60 секунд. Цена — за секунду ролика, списывается при создании.",
+        "en": "Short 1–15 second clips with the same key. The job is created instantly, the video is usually ready in 10–60 seconds. Priced per second of clip, charged at creation."
       },
-      "steps": [],
+      "steps": [
+        {
+          "t": {
+            "ru": "Создать задачу",
+            "en": "Create the job"
+          },
+          "fields": [
+            [
+              "Endpoint",
+              "https://api.aikeysforyou.com/v1/videos/generations"
+            ],
+            [
+              "API Key",
+              "{{KEY}}"
+            ],
+            [
+              "Model",
+              "grok-imagine-video"
+            ]
+          ],
+          "p": {
+            "ru": "JSON: model, prompt, duration (1–15), resolution (480p или 720p), aspect_ratio (16:9, 9:16, 1:1). Для видео из картинки добавьте image — data-URL картинки. В ответе request_id и списанная сумма.",
+            "en": "JSON: model, prompt, duration (1–15), resolution (480p or 720p), aspect_ratio (16:9, 9:16, 1:1). For image-to-video add image — a data URL of the picture. The reply has request_id and the charged amount."
+          }
+        },
+        {
+          "t": {
+            "ru": "Дождаться результата",
+            "en": "Wait for the result"
+          },
+          "fields": [
+            [
+              "Статус",
+              "GET https://api.aikeysforyou.com/v1/videos/{request_id}"
+            ]
+          ],
+          "p": {
+            "ru": "Опрашивайте раз в 5 секунд, пока status не станет completed — тогда в ответе video.url со ссылкой на mp4. Готовый пример на Python ниже.",
+            "en": "Poll every 5 seconds until status is completed — then the reply has video.url with the mp4 link. A ready Python example is below."
+          },
+          "code": {
+            "win": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break",
+            "mac": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break",
+            "linux": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break"
+          }
+        },
+        {
+          "t": {
+            "ru": "Сколько списывается",
+            "en": "What it costs"
+          },
+          "p": {
+            "ru": "Цена за секунду по разрешению — в блоке «Картинки, речь и видео» на главной; видео из картинки дороже (плюс фиксированная надбавка за входную картинку). Если задачу не удалось создать, токены возвращаются.",
+            "en": "Per-second prices by resolution are in the “Images, speech and video” block on the home page; image-to-video costs more (plus a fixed surcharge for the input image). If the job cannot be created, the tokens are returned."
+          }
+        }
+      ],
       "after": []
     },
     "n8n": {
@@ -1431,5 +1571,5 @@ window.__AIKEYS_CATALOG__ = {
       }
     ]
   },
-  "generatedAt": "2026-10-13T12:20:00.595Z"
+  "generatedAt": "2026-10-13T12:48:36.563Z"
 };

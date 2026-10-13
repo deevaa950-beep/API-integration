@@ -147,6 +147,43 @@ function makeCodeBlock(rawCode) {
   return wrap;
 }
 
+function normalizeFields(fields) {
+  if (Array.isArray(fields)) {
+    return fields.map((field) => {
+      if (Array.isArray(field)) return [text(field[0]), itemForOs(field[1])];
+      if (field && typeof field === 'object') {
+        const [label, value] = Object.entries(field)[0] || [];
+        return [text(label), itemForOs(value)];
+      }
+      return ['', ''];
+    }).filter(([label, value]) => label && value);
+  }
+  if (fields && typeof fields === 'object') {
+    return Object.entries(fields)
+      .map(([label, value]) => [text(label), itemForOs(value)])
+      .filter(([label, value]) => label && value);
+  }
+  return [];
+}
+
+function makeFieldsBlock(fields) {
+  const rows = normalizeFields(fields);
+  if (!rows.length) return null;
+
+  const list = node('dl', 'guide-fields');
+  rows.forEach(([label, value]) => {
+    const row = node('div', 'guide-field');
+    const term = node('dt', '', label);
+    const definition = document.createElement('dd');
+    const code = document.createElement('code');
+    code.textContent = secureCode(value);
+    definition.append(code);
+    row.append(term, definition);
+    list.append(row);
+  });
+  return list;
+}
+
 function renderGuide() {
   const parent = clear(elements.guide);
   const recipe = state.catalog?.recipes?.[state.appId];
@@ -178,6 +215,8 @@ function renderGuide() {
     body.append(node('h4', '', text(step.t ?? step.title, `Шаг ${index + 1}`)));
     const description = itemForOs(step.p ?? step.description);
     if (description) body.append(node('p', '', description));
+    const fields = makeFieldsBlock(step.fields);
+    if (fields) body.append(fields);
     const code = itemForOs(step.code);
     if (code) body.append(makeCodeBlock(code));
     stepElement.append(body);

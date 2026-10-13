@@ -115,6 +115,12 @@ h2 { margin-bottom: 0; font-size: clamp(32px, 4.1vw, 48px); letter-spacing: -.05
 .step-index { display: grid; width: 31px; height: 31px; place-items: center; border: 1px solid rgba(216,121,50,.48); border-radius: 50%; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; }
 .step h4 { margin-bottom: 8px; color: #f2e7de; font-size: 16px; letter-spacing: -.02em; }
 .step p { max-width: 740px; margin-bottom: 14px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+.guide-fields { display: grid; gap: 0; max-width: 780px; margin: 0 0 14px; overflow: hidden; border: 1px solid rgba(231,203,178,.13); border-radius: 8px; background: rgba(16,13,11,.68); }
+.guide-field { display: grid; grid-template-columns: minmax(90px, .26fr) minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px 13px; }
+.guide-field + .guide-field { border-top: 1px solid var(--line); }
+.guide-field dt { color: var(--subtle); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; font-weight: 700; line-height: 1.5; }
+.guide-field dd { min-width: 0; margin: 0; }
+.guide-field code { color: #f1ddce; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; line-height: 1.55; overflow-wrap: anywhere; }
 .code-wrap { position: relative; max-width: 780px; overflow: hidden; border: 1px solid rgba(231,203,178,.13); border-radius: 8px; background: #100d0b; }
 .code-wrap pre { max-height: 350px; margin: 0; padding: 17px 54px 17px 17px; overflow: auto; color: #f1ddce; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.68; tab-size: 2; white-space: pre-wrap; overflow-wrap: anywhere; }
 .code-wrap code { font-family: inherit; }
@@ -210,6 +216,7 @@ h2 { margin-bottom: 0; font-size: clamp(32px, 4.1vw, 48px); letter-spacing: -.05
   .section-heading, .section-heading--models { align-items: flex-start; flex-direction: column; gap: 13px; margin-bottom: 25px; }.section-note { text-align: left; }.model-search { width: 100%; }
   .setup-controls { padding: 17px; }.key-notice { grid-template-columns: auto minmax(0, 1fr); padding: 16px; }.key-field { grid-column: 1 / -1; }
   .guide-card { padding: 24px 17px; }.guide-header { grid-template-columns: 1fr; gap: 13px; padding-bottom: 22px; }.step { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; }.guide-after { margin-left: 0; }
+  .guide-field { grid-template-columns: 1fr; gap: 3px; }
   .models-grid, .savings-grid { grid-template-columns: 1fr; }.savings-card { min-height: auto; }.error-summary { padding: 16px; }.error-details__inside { margin: 0 16px 16px; }
   .safety-callout { gap: 16px; margin-bottom: 53px; padding: 23px; }.safety-callout h2 { font-size: 20px; }
   .site-footer { grid-template-columns: 1fr auto; gap: 15px; padding: 22px 0; }.site-footer p { display: none; }
