@@ -32,6 +32,118 @@ const modelFilterLabels = {
   video: 'Видео'
 };
 
+// Every fixed label visible on the public page lives here too. The admin
+// source editor persists this object alongside guides, models and errors.
+const defaultUi = Object.freeze({
+  brandName: 'Aikeys',
+  brandSuffix: 'Docs',
+  navSetup: 'Подключение',
+  navModels: 'Модели',
+  navSavings: 'Советы',
+  navErrors: 'Ошибки',
+  headerGuide: 'Открыть инструкцию',
+  heroEyebrow: 'Справочник по подключению',
+  heroTitle: 'Подключайте AI-инструменты',
+  heroAccent: 'уверенно.',
+  heroLead: 'Пошаговые настройки для рабочих приложений, актуальные ID моделей и понятные решения ошибок — в одном месте.',
+  heroPrimary: 'Выбрать программу',
+  heroSecondary: 'Найти решение',
+  gatewayHeading: 'Ваш API-шлюз',
+  gatewayCopy: 'Скопировать адрес',
+  gatewayHint: 'Ключ вводится только в вашем приложении — этот сайт его не сохраняет.',
+  trustOne: 'Настройки для Windows, macOS и Linux',
+  trustTwo: 'Каталог ID моделей и версий',
+  trustThree: 'База частых ошибок без лишнего шума',
+  setupEyebrow: '01 · Подключение',
+  setupTitle: 'Выберите, что настраиваете',
+  programLabel: 'Программа',
+  systemLabel: 'Система',
+  keyTitle: 'Хотите увидеть готовый пример?',
+  keyHint: 'Вставьте ключ только для локального предпросмотра. Он не отправляется на сервер и исчезнет после обновления страницы.',
+  keyPlaceholder: 'Вставить API-ключ',
+  modelsEyebrow: '02 · Каталог',
+  modelsTitle: 'Модели и версии',
+  modelsSearch: 'Найти по имени или ID',
+  modelsIntroBefore: 'Используйте точный',
+  modelsIntroAfter: 'в настройках клиента. Каталог не показывает цены или баланс — только совместимые модели и их назначение.',
+  savingsIntroFallback: 'Несколько простых настроек помогают не расходовать контекст впустую.',
+  filterAll: 'Все',
+  filterText: 'Текст и код',
+  filterImage: 'Изображения',
+  filterVideo: 'Видео',
+  savingsEyebrow: '03 · Советы',
+  savingsTitle: 'Как тратить меньше',
+  errorsEyebrow: '04 · Диагностика',
+  errorsTitle: 'Если что-то пошло не так',
+  errorsHint: 'Откройте карточку с похожей ошибкой и идите по чек-листу.',
+  helperTitle: 'С чего начать',
+  helperText: 'В большинстве случаев проблема решается проверкой трёх вещей: ключа, адреса шлюза и точного ID модели.',
+  helperLink: 'Вернуться к настройке',
+  safetyTitle: 'Ключ — только для вашего клиента',
+  safetyBeforeCode: 'Не отправляйте API-ключ в чат, на скриншоты и в репозиторий. Добавляйте файлы конфигурации с ключом в',
+  safetyAfterCode: '.',
+  footerLead: 'Справочник по подключению ·',
+  footerAdmin: 'Админка',
+  footerBack: 'Вернуться к сайту',
+  footerTop: 'Наверх ↑',
+  copy: 'Копировать',
+  copied: 'Скопировано',
+  noRecipeMeta: 'проверьте настройки клиента',
+  forSystem: 'для',
+  stepPrefix: 'Шаг',
+  modelOne: 'модель',
+  modelMany: 'моделей',
+  copyModelId: 'Скопировать Model ID',
+  tipPrefix: 'Совет',
+  fallbackErrorTitle: 'Ошибка подключения',
+  fallbackErrorDescription: 'Откройте карточку для решения.',
+  localData: 'локальные данные',
+  catalogUpdated: 'Справочник обновлён',
+  upstreamUpdated: 'Каталог обновлён',
+  offlineAvailable: 'Справочник доступен офлайн',
+  catalogUpdatedFooter: 'каталог обновлён',
+  catalogFallbackFooter: 'резервный каталог',
+  catalogLoadFailed: 'Не удалось загрузить каталог',
+  catalogLoadHint: 'Проверьте, что сервер запущен, и обновите страницу.',
+  noRecipe: 'Инструкция для этого клиента появится в следующем обновлении каталога.',
+  noRecipeTail: 'Для подключения используйте адрес',
+  noRecipeEnd: 'и точный Model ID из каталога ниже.',
+  emptyModels: 'По этому запросу моделей не нашлось. Попробуйте другое имя или ID.',
+  fallbackErrorOne: 'Сверьте ключ, адрес шлюза и точный ID модели.',
+  fallbackErrorTwo: 'Перезапустите приложение после изменения настроек.'
+});
+
+function withUi(catalog) {
+  if (!catalog || typeof catalog !== 'object') return catalog;
+  return {
+    ...catalog,
+    ui: {
+      ...defaultUi,
+      ...(catalog.ui && typeof catalog.ui === 'object' ? catalog.ui : {})
+    }
+  };
+}
+
+function uiText(key, fallback = '') {
+  const value = state.catalog?.ui?.[key] ?? defaultUi[key] ?? fallback;
+  return typeof value === 'string' || typeof value === 'number' ? String(value) : fallback;
+}
+
+function applyUiText() {
+  document.querySelectorAll('[data-ui]').forEach((element) => {
+    const value = uiText(element.dataset.ui, element.textContent || '');
+    element.textContent = value;
+  });
+  document.querySelectorAll('[data-ui-placeholder]').forEach((element) => {
+    element.setAttribute('placeholder', uiText(element.dataset.uiPlaceholder, element.getAttribute('placeholder') || ''));
+  });
+}
+
+function modelFilterLabel(id) {
+  const key = { all: 'filterAll', text: 'filterText', image: 'filterImage', video: 'filterVideo' }[id];
+  return uiText(key, modelFilterLabels[id] || id);
+}
+
 function text(value, fallback = '') {
   if (typeof value === 'string' || typeof value === 'number') return String(value);
   if (value && typeof value === 'object') return String(value.ru ?? value.name ?? value.en ?? Object.values(value)[0] ?? fallback);
@@ -78,7 +190,7 @@ async function copy(value, trigger) {
   const original = trigger?.textContent;
   try {
     await navigator.clipboard.writeText(value);
-    if (trigger) trigger.textContent = 'Скопировано';
+    if (trigger) trigger.textContent = uiText('copied', 'Скопировано');
   } catch {
     const input = document.createElement('textarea');
     input.value = value;
@@ -89,7 +201,7 @@ async function copy(value, trigger) {
     input.select();
     document.execCommand('copy');
     input.remove();
-    if (trigger) trigger.textContent = 'Скопировано';
+    if (trigger) trigger.textContent = uiText('copied', 'Скопировано');
   }
   if (trigger) setTimeout(() => { trigger.textContent = original; }, 1300);
 }
@@ -140,7 +252,7 @@ function makeCodeBlock(rawCode) {
   codeElement.textContent = codeValue;
   pre.append(codeElement);
 
-  const copyButton = node('button', 'copy-code', 'Копировать');
+  const copyButton = node('button', 'copy-code', uiText('copy', 'Копировать'));
   copyButton.type = 'button';
   copyButton.addEventListener('click', () => copy(codeValue, copyButton));
   wrap.append(pre, copyButton);
@@ -193,8 +305,8 @@ function renderGuide() {
     const header = node('div', 'guide-header');
     const copyBlock = document.createElement('div');
     copyBlock.append(node('h3', '', appTitle(selectedApp)));
-    copyBlock.append(node('p', '', `Инструкция для этого клиента появится в следующем обновлении каталога. Для подключения используйте адрес ${gatewayUrl()} и точный Model ID из каталога ниже.`));
-    header.append(copyBlock, node('span', 'guide-meta', 'проверьте настройки клиента'));
+    copyBlock.append(node('p', '', `${uiText('noRecipe')} ${uiText('noRecipeTail')} ${gatewayUrl()} ${uiText('noRecipeEnd')}`));
+    header.append(copyBlock, node('span', 'guide-meta', uiText('noRecipeMeta', 'проверьте настройки клиента')));
     parent.append(header);
     return;
   }
@@ -203,7 +315,7 @@ function renderGuide() {
   const headerCopy = document.createElement('div');
   headerCopy.append(node('h3', '', appTitle(selectedApp)));
   headerCopy.append(node('p', '', text(recipe.intro)));
-  header.append(headerCopy, node('span', 'guide-meta', `для ${text((state.catalog.oses || []).find((os) => os.id === state.osId)?.ru, state.osId)}`));
+  header.append(headerCopy, node('span', 'guide-meta', `${uiText('forSystem', 'для')} ${text((state.catalog.oses || []).find((os) => os.id === state.osId)?.ru, state.osId)}`));
   parent.append(header);
 
   const steps = node('div', 'steps');
@@ -212,7 +324,7 @@ function renderGuide() {
     const stepElement = node('section', 'step');
     stepElement.append(node('span', 'step-index', String(index + 1).padStart(2, '0')));
     const body = document.createElement('div');
-    body.append(node('h4', '', text(step.t ?? step.title, `Шаг ${index + 1}`)));
+    body.append(node('h4', '', text(step.t ?? step.title, `${uiText('stepPrefix', 'Шаг')} ${index + 1}`)));
     const description = itemForOs(step.p ?? step.description);
     if (description) body.append(node('p', '', description));
     const fields = makeFieldsBlock(step.fields);
@@ -258,8 +370,8 @@ function matchesModel(model, group) {
 
 function renderModelFilter() {
   const parent = clear(elements.modelFilter);
-  Object.entries(modelFilterLabels).forEach(([id, label]) => {
-    const button = node('button', 'filter-tab', label);
+  Object.keys(modelFilterLabels).forEach((id) => {
+    const button = node('button', 'filter-tab', modelFilterLabel(id));
     button.type = 'button';
     button.setAttribute('aria-pressed', String(state.modelFilter === id));
     button.addEventListener('click', () => {
@@ -280,7 +392,7 @@ function renderModels() {
     total += models.length;
     const card = node('article', 'provider-card');
     const header = node('header', 'provider-card__header');
-    header.append(node('h3', '', group.name), node('span', '', `${models.length} ${models.length === 1 ? 'модель' : 'моделей'}`));
+    header.append(node('h3', '', group.name), node('span', '', `${models.length} ${models.length === 1 ? uiText('modelOne', 'модель') : uiText('modelMany', 'моделей')}`));
     const list = node('ul', 'model-rows');
     models.forEach((model) => {
       const row = node('li', 'model-row');
@@ -288,10 +400,10 @@ function renderModels() {
       info.append(node('span', 'model-name', text(model.name ?? model.ru, model.id)));
       const idButton = node('button', 'model-id', text(model.id));
       idButton.type = 'button';
-      idButton.title = 'Скопировать Model ID';
+      idButton.title = uiText('copyModelId', 'Скопировать Model ID');
       idButton.addEventListener('click', () => copy(text(model.id), idButton));
       info.append(idButton);
-      row.append(info, node('span', 'model-kind', text(model.kind, group.type === 'text' ? 'Текст / код' : modelFilterLabels[group.type])));
+      row.append(info, node('span', 'model-kind', text(model.kind, modelFilterLabel(group.type))));
       list.append(row);
     });
     card.append(header, list);
@@ -306,7 +418,7 @@ function renderSavings() {
   if (elements.savingsIntro) {
     elements.savingsIntro.textContent = text(
       savings.intro,
-      'Несколько простых настроек помогают не расходовать контекст впустую.'
+      uiText('savingsIntroFallback', 'Несколько простых настроек помогают не расходовать контекст впустую.')
     );
   }
   if (!elements.savingsList) return;
@@ -315,7 +427,7 @@ function renderSavings() {
   tips.forEach((tip, index) => {
     const card = node('article', 'savings-card');
     card.append(node('span', 'savings-index', String(index + 1).padStart(2, '0')));
-    card.append(node('h3', '', text(tip.title ?? tip.t, `Совет ${index + 1}`)));
+    card.append(node('h3', '', text(tip.title ?? tip.t, `${uiText('tipPrefix', 'Совет')} ${index + 1}`)));
     card.append(node('p', '', text(tip.body ?? tip.p ?? tip.description)));
     parent.append(card);
   });
@@ -325,7 +437,7 @@ function listFromError(error) {
   if (Array.isArray(error.fix)) return error.fix;
   if (Array.isArray(error.steps)) return error.steps.map((step) => text(step));
   if (error.fix) return [text(error.fix)];
-  return ['Сверьте ключ, адрес шлюза и точный ID модели.', 'Перезапустите приложение после изменения настроек.'];
+  return [uiText('fallbackErrorOne'), uiText('fallbackErrorTwo')];
 }
 
 function normalizedErrors() {
@@ -344,8 +456,8 @@ function renderErrors() {
     summary.type = 'button';
     summary.setAttribute('aria-expanded', 'true');
     const caption = document.createElement('div');
-    caption.append(node('strong', '', text(error.title ?? error.t ?? error.id, 'Ошибка подключения')));
-    caption.append(node('span', '', text(error.symptoms ?? error.description ?? error.p, 'Откройте карточку для решения.')));
+    caption.append(node('strong', '', text(error.title ?? error.t ?? error.id, uiText('fallbackErrorTitle', 'Ошибка подключения'))));
+    caption.append(node('span', '', text(error.symptoms ?? error.description ?? error.p, uiText('fallbackErrorDescription', 'Откройте карточку для решения.'))));
     summary.append(caption, node('span', 'error-chevron', '+'));
     const details = node('div', 'error-details');
     const detailsInner = document.createElement('div');
@@ -374,19 +486,20 @@ function setMetadata() {
   const updated = meta.updatedAt ? new Date(meta.updatedAt) : null;
   const timestamp = updated && !Number.isNaN(updated.valueOf())
     ? updated.toLocaleString('ru-RU', { dateStyle: 'medium', timeStyle: 'short' })
-    : 'локальные данные';
+    : uiText('localData', 'локальные данные');
   const source = meta.source === 'supabase'
-    ? 'Справочник обновлён'
+    ? uiText('catalogUpdated', 'Справочник обновлён')
     : meta.source === 'upstream'
-      ? 'Каталог обновлён'
-      : 'Справочник доступен офлайн';
+      ? uiText('upstreamUpdated', 'Каталог обновлён')
+      : uiText('offlineAvailable', 'Справочник доступен офлайн');
   elements.catalogStatus.textContent = `${source} · ${timestamp}`;
   elements.footerUpdated.textContent = (meta.source === 'upstream' || meta.source === 'supabase')
-    ? `каталог обновлён ${timestamp}`
-    : 'резервный каталог';
+    ? `${uiText('catalogUpdatedFooter', 'каталог обновлён')} ${timestamp}`
+    : uiText('catalogFallbackFooter', 'резервный каталог');
 }
 
 function renderAll() {
+  applyUiText();
   setMetadata();
   renderAppTabs();
   renderOsTabs();
@@ -398,8 +511,8 @@ function renderAll() {
 }
 
 function showFatalError() {
-  elements.catalogStatus.textContent = 'Не удалось загрузить каталог';
-  elements.guide.replaceChildren(node('p', '', 'Проверьте, что сервер запущен, и обновите страницу.'));
+  elements.catalogStatus.textContent = uiText('catalogLoadFailed', 'Не удалось загрузить каталог');
+  elements.guide.replaceChildren(node('p', '', uiText('catalogLoadHint', 'Проверьте, что сервер запущен, и обновите страницу.')));
 }
 
 document.querySelectorAll('[data-copy-target]').forEach((button) => {
@@ -431,7 +544,9 @@ function applySiteConfig() {
   if (typeof config.title === 'string' && config.title.trim()) document.title = config.title.trim();
   if (typeof config.favicon === 'string' && config.favicon.trim()) {
     const favicon = document.querySelector('#site-favicon');
-    if (favicon) favicon.setAttribute('href', config.favicon.trim());
+    const iconPath = config.favicon.trim();
+    const isAdminRoute = location.pathname.replace(/\/+$/, '').endsWith('/admin');
+    if (favicon) favicon.setAttribute('href', isAdminRoute && iconPath.startsWith('./') ? `../${iconPath.slice(2)}` : iconPath);
   }
 }
 
@@ -480,14 +595,14 @@ async function initialise() {
   elements.guide.append(loading);
   const useBundledCatalog = () => {
     if (!window.__AIKEYS_CATALOG__) return false;
-    state.catalog = {
+    state.catalog = withUi({
       ...window.__AIKEYS_CATALOG__,
       meta: {
         source: 'local snapshot',
         updatedAt: window.__AIKEYS_CATALOG__.generatedAt || new Date().toISOString(),
         gatewayUrl: 'https://api.aikeysforyou.com'
       }
-    };
+    });
     renderAll();
     return true;
   };
@@ -497,7 +612,7 @@ async function initialise() {
   try {
     const publishedCatalog = await loadSupabaseCatalog();
     if (publishedCatalog) {
-      state.catalog = publishedCatalog;
+      state.catalog = withUi(publishedCatalog);
       renderAll();
       return;
     }
@@ -514,7 +629,7 @@ async function initialise() {
   try {
     const response = await fetch('./api/catalog', { headers: { accept: 'application/json' } });
     if (!response.ok) throw new Error('Catalog request failed');
-    state.catalog = await response.json();
+    state.catalog = withUi(await response.json());
     renderAll();
   } catch (error) {
     // Opening index.html directly is an intentional no-install launch path.
@@ -524,6 +639,21 @@ async function initialise() {
     showFatalError();
   }
 }
+
+// The admin route uses the same public renderer. It only receives a small,
+// deliberate API for previewing and saving JSON content; it never exposes a
+// way to edit the site's JavaScript or CSS from the browser.
+window.__AIKEYS_DOCS_APP__ = {
+  getCatalog() {
+    return state.catalog ? JSON.parse(JSON.stringify(state.catalog)) : null;
+  },
+  setCatalog(catalog) {
+    if (!catalog || typeof catalog !== 'object') return false;
+    state.catalog = withUi(catalog);
+    renderAll();
+    return true;
+  }
+};
 
 applySiteConfig();
 initialise();
