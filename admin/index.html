@@ -4,82 +4,173 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a1111" />
-    <meta name="description" content="Администрирование Aikeys Docs" />
-    <title>Aikeys Docs — админка</title>
+    <meta name="description" content="Справочник по подключению AI-инструментов через api.aikeysforyou.com" />
+    <title>Aikeys Docs — редактирование</title>
     <link id="site-favicon" rel="icon" href="../site-icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="./admin.css" />
+    <link rel="stylesheet" href="./admin-mode.css" />
   </head>
-  <body class="admin-page">
-    <header class="site-header admin-header">
-      <a class="brand" href="../" aria-label="Aikeys Docs — на главную">
+  <body>
+    <a class="skip-link" href="#setup">Перейти к инструкции</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Aikeys Docs — на главную">
         <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true">
           <path d="M18 3.5 30.5 11v14L18 32.5 5.5 25V11L18 3.5Z" fill="none" stroke="currentColor" stroke-width="2.2" />
           <path d="m12.2 18 3.8 3.8 7.8-8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" />
         </svg>
-        <span>Aikeys <b>Docs</b></span>
+        <span><span data-ui="brandName">Aikeys</span> <b data-ui="brandSuffix">Docs</b></span>
       </a>
-      <a class="header-link" href="../">← Открыть справочник</a>
+      <nav class="main-nav" aria-label="Основная навигация">
+        <a href="#setup" data-ui="navSetup">Подключение</a>
+        <a href="#models" data-ui="navModels">Модели</a>
+        <a href="#savings" data-ui="navSavings">Советы</a>
+        <a href="#errors" data-ui="navErrors">Ошибки</a>
+      </nav>
+      <a class="header-link" href="#setup"><span data-ui="headerGuide">Открыть инструкцию</span> <span aria-hidden="true">↗</span></a>
     </header>
 
-    <main class="admin-shell">
-      <section class="admin-login" id="login-panel" aria-labelledby="login-title">
-        <p class="eyebrow">Закрытый раздел</p>
-        <h1 id="login-title">Редактирование справочника</h1>
-        <p class="admin-lede">Обычным посетителям вход не нужен. Здесь могут войти только пользователи, добавленные в список администраторов Supabase.</p>
-        <form class="login-form" id="login-form">
-          <label>
-            <span>Email</span>
-            <input id="login-email" type="email" autocomplete="email" required placeholder="you@example.com" />
-          </label>
-          <label>
-            <span>Пароль</span>
-            <input id="login-password" type="password" autocomplete="current-password" required placeholder="Ваш пароль" />
-          </label>
-          <button class="button button-primary" id="login-submit" type="submit">Войти в админку</button>
-        </form>
-        <p class="admin-hint">Регистрации на сайте нет: первый админ-аккаунт создаётся в панели Supabase. Ключ API сюда вводить не нужно.</p>
-        <p class="admin-message" id="login-message" aria-live="polite"></p>
+    <main id="top">
+      <section class="hero section-shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="pulse-dot"></span><span data-ui="heroEyebrow">Справочник по подключению</span></p>
+          <h1 id="hero-title"><span data-ui="heroTitle">Подключайте AI-инструменты</span> <em data-ui="heroAccent">уверенно.</em></h1>
+          <p class="hero-lede" data-ui="heroLead">Пошаговые настройки для рабочих приложений, актуальные ID моделей и понятные решения ошибок — в одном месте.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#setup"><span data-ui="heroPrimary">Выбрать программу</span> <span aria-hidden="true">↓</span></a>
+            <a class="button button-quiet" href="#errors" data-ui="heroSecondary">Найти решение</a>
+          </div>
+        </div>
+        <aside class="gateway-card" aria-label="Адрес API-шлюза">
+          <div class="gateway-card__header">
+            <span class="status-lamp"></span>
+            <span data-ui="gatewayHeading">Ваш API-шлюз</span>
+          </div>
+          <code id="gateway-url">https://api.aikeysforyou.com</code>
+          <button class="copy-line" type="button" data-copy-target="#gateway-url">
+            <span data-ui="gatewayCopy">Скопировать адрес</span><span class="copy-icon" aria-hidden="true">⧉</span>
+          </button>
+          <p data-ui="gatewayHint">Ключ вводится только в вашем приложении — этот сайт его не сохраняет.</p>
+        </aside>
       </section>
 
-      <section class="admin-workspace" id="workspace" hidden aria-label="Редактор инструкций">
-        <aside class="admin-sidebar">
-          <div class="admin-sidebar__head">
-            <p class="eyebrow">Вы вошли как</p>
-            <strong id="account-email">—</strong>
-          </div>
-          <label class="admin-select-label" for="recipe-select">Инструкция</label>
-          <select id="recipe-select" class="admin-select"></select>
-          <p class="sidebar-note">Модели и ошибки здесь не редактируются — меняются только инструкции, шаги, поля, коды и сноски.</p>
-          <div class="sidebar-actions">
-            <button class="button button-quiet" id="create-recipe" type="button">Создать инструкцию</button>
-            <button class="button button-danger" id="delete-recipe" type="button">Удалить инструкцию</button>
-          </div>
-          <button class="signout-button" id="signout" type="button">Выйти из админки</button>
-        </aside>
+      <section class="trust-strip" aria-label="Преимущества справочника">
+        <div><span class="trust-index">01</span><p data-ui="trustOne">Настройки для Windows, macOS и Linux</p></div>
+        <div><span class="trust-index">02</span><p data-ui="trustTwo">Каталог ID моделей и версий</p></div>
+        <div><span class="trust-index">03</span><p data-ui="trustThree">База частых ошибок без лишнего шума</p></div>
+      </section>
 
-        <section class="admin-editor-panel">
-          <header class="editor-toolbar">
-            <div>
-              <p class="eyebrow">Изменения</p>
-              <h1 id="editor-title">Инструкция</h1>
-            </div>
-            <div class="editor-actions">
-              <span class="save-status" id="save-status" aria-live="polite">Загружаем данные…</span>
-              <button class="button button-primary" id="save-catalog" type="button">Сохранить и опубликовать</button>
-            </div>
-          </header>
-          <div class="admin-warning">
-            <span aria-hidden="true">✦</span>
-            <p>Не вставляйте реальный API-ключ в код. Оставляйте <code>{{KEY}}</code> — посетитель подставляет свой ключ только локально.</p>
+      <section class="section-shell setup-section" id="setup" aria-labelledby="setup-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-ui="setupEyebrow">01 · Подключение</p>
+            <h2 id="setup-title" data-ui="setupTitle">Выберите, что настраиваете</h2>
           </div>
-          <div id="recipe-editor" class="recipe-editor"></div>
-        </section>
+          <p class="section-note" id="catalog-status" aria-live="polite">Загружаем каталог…</p>
+        </div>
+
+        <div class="setup-controls">
+          <div class="control-group control-group--wide">
+            <span class="control-label" data-ui="programLabel">Программа</span>
+            <div class="app-tabs" id="app-tabs" role="tablist" aria-label="Выбор программы"></div>
+          </div>
+          <div class="control-group">
+            <span class="control-label" data-ui="systemLabel">Система</span>
+            <div class="segment-tabs" id="os-tabs" role="tablist" aria-label="Выбор системы"></div>
+          </div>
+        </div>
+
+        <div class="key-notice">
+          <div class="key-notice__icon" aria-hidden="true">⌁</div>
+          <div>
+            <strong data-ui="keyTitle">Хотите увидеть готовый пример?</strong>
+            <p data-ui="keyHint">Вставьте ключ только для локального предпросмотра. Он не отправляется на сервер и исчезнет после обновления страницы.</p>
+          </div>
+          <label class="key-field">
+            <span class="sr-only">API-ключ для локального предпросмотра</span>
+            <input id="api-key" type="password" autocomplete="off" placeholder="Вставить API-ключ" data-ui-placeholder="keyPlaceholder" />
+            <button type="button" class="eye-button" id="toggle-key" aria-label="Показать ключ">◉</button>
+          </label>
+        </div>
+
+        <article class="guide-card" id="guide-card" aria-live="polite"></article>
+      </section>
+
+      <section class="section-shell models-section" id="models" aria-labelledby="models-title">
+        <div class="section-heading section-heading--models">
+          <div>
+            <p class="eyebrow" data-ui="modelsEyebrow">02 · Каталог</p>
+            <h2 id="models-title" data-ui="modelsTitle">Модели и версии</h2>
+          </div>
+          <label class="model-search">
+            <span class="search-symbol" aria-hidden="true">⌕</span>
+            <span class="sr-only">Поиск модели</span>
+            <input id="model-search" type="search" placeholder="Найти по имени или ID" data-ui-placeholder="modelsSearch" />
+          </label>
+        </div>
+        <p class="models-intro"><span data-ui="modelsIntroBefore">Используйте точный</span> <b>Model ID</b> <span data-ui="modelsIntroAfter">в настройках клиента. Каталог не показывает цены или баланс — только совместимые модели и их назначение.</span></p>
+        <div class="models-filter" id="models-filter" aria-label="Фильтр по типу моделей"></div>
+        <div class="models-grid" id="models-grid"></div>
+        <p class="empty-state" id="models-empty" hidden data-ui="emptyModels">По этому запросу моделей не нашлось. Попробуйте другое имя или ID.</p>
+      </section>
+
+      <section class="section-shell savings-section" id="savings" aria-labelledby="savings-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-ui="savingsEyebrow">03 · Советы</p>
+            <h2 id="savings-title" data-ui="savingsTitle">Как тратить меньше</h2>
+          </div>
+          <p class="section-note" id="savings-intro">Несколько простых настроек помогают не расходовать контекст впустую.</p>
+        </div>
+        <div class="savings-grid" id="savings-list"></div>
+      </section>
+
+      <section class="section-shell errors-section" id="errors" aria-labelledby="errors-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-ui="errorsEyebrow">04 · Диагностика</p>
+            <h2 id="errors-title" data-ui="errorsTitle">Если что-то пошло не так</h2>
+          </div>
+          <p class="section-note" data-ui="errorsHint">Откройте карточку с похожей ошибкой и идите по чек-листу.</p>
+        </div>
+        <div class="errors-layout">
+          <div class="error-helper">
+            <span class="helper-symbol" aria-hidden="true">?</span>
+            <h3 data-ui="helperTitle">С чего начать</h3>
+            <p data-ui="helperText">В большинстве случаев проблема решается проверкой трёх вещей: ключа, адреса шлюза и точного ID модели.</p>
+            <a href="#setup"><span data-ui="helperLink">Вернуться к настройке</span> <span aria-hidden="true">↑</span></a>
+          </div>
+          <div class="error-list" id="error-list"></div>
+        </div>
+      </section>
+
+      <section class="section-shell safety-callout" aria-label="Важно о безопасности ключа">
+        <span class="safety-icon" aria-hidden="true">✦</span>
+        <div>
+          <h2 data-ui="safetyTitle">Ключ — только для вашего клиента</h2>
+          <p><span data-ui="safetyBeforeCode">Не отправляйте API-ключ в чат, на скриншоты и в репозиторий. Добавляйте файлы конфигурации с ключом в</span> <code>.gitignore</code><span data-ui="safetyAfterCode">.</span></p>
+        </div>
       </section>
     </main>
 
-    <script src="../site-config.js"></script>
-    <script src="../catalog-seed.js"></script>
-    <script src="./admin.js" defer></script>
+    <footer class="site-footer">
+      <a class="brand" href="#top" aria-label="Aikeys Docs — наверх">
+        <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true"><path d="M18 3.5 30.5 11v14L18 32.5 5.5 25V11L18 3.5Z" fill="none" stroke="currentColor" stroke-width="2.2" /><path d="m12.2 18 3.8 3.8 7.8-8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" /></svg>
+        <span><span data-ui="brandName">Aikeys</span> <b data-ui="brandSuffix">Docs</b></span>
+      </a>
+      <p><span data-ui="footerLead">Справочник по подключению ·</span> <span id="footer-updated">обновляем каталог</span></p>
+      <div class="footer-links">
+        <a href="../" data-ui="footerBack">Вернуться к сайту</a>
+        <a href="#top" data-ui="footerTop">Наверх ↑</a>
+      </div>
+    </footer>
+
+    <template id="loading-guide">
+      <div class="guide-loading"><span></span><span></span><span></span></div>
+    </template>
+    <script src="../site-config.js?v=20261018-editor"></script>
+    <script src="../catalog-seed.js?v=20261018-editor"></script>
+    <script src="../app.js?v=20261018-editor" defer></script>
+    <script src="./admin-mode.js?v=20261018-editor" defer></script>
   </body>
 </html>
