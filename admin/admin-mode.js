@@ -1,13 +1,17 @@
 const adminModeSessionKey = 'aikeys-docs-inline-editor-session';
+
 const adminModeState = {
   session: null,
   app: null,
   shell: null,
-  drawer: null,
-  source: null,
+  trigger: null,
+  toolbar: null,
+  dialog: null,
   status: null,
-  account: null,
-  open: false
+  loginStatus: null,
+  active: false,
+  dirty: false,
+  baseline: null
 };
 
 function adminModeConfig() {
@@ -25,16 +29,21 @@ function adminModeNode(tag, className, content) {
   return element;
 }
 
-function adminModeClear(element) {
-  element.replaceChildren();
-  return element;
+function adminModeClone(value) {
+  return value ? JSON.parse(JSON.stringify(value)) : value;
 }
 
 function adminModeSetStatus(message, tone = '') {
-  if (!adminModeState.status) return;
-  adminModeState.status.textContent = message || '';
-  adminModeState.status.classList.toggle('is-error', tone === 'error');
-  adminModeState.status.classList.toggle('is-success', tone === 'success');
+  [adminModeState.status, adminModeState.loginStatus].filter(Boolean).forEach((status) => {
+    status.textContent = message || '';
+    status.className = `admin-mode__status${tone ? ` is-${tone}` : ''}`;
+  });
+}
+
+function adminModeSetDirty(value = true) {
+  adminModeState.dirty = value;
+  adminModeState.toolbar?.classList.toggle('has-unsaved', value);
+  if (value) adminModeSetStatus('Есть несохранённые изменения.', 'warning');
 }
 
 function adminModeError(response, payload) {
@@ -46,7 +55,7 @@ function adminModeError(response, payload) {
 
 async function adminModeRequest(path, options = {}, token = null) {
   const config = adminModeConfig();
-  if (!config) throw new Error('Параметры Supabase не найдены. Обновите страницу с очисткой кэша.');
+  if (!config) throw new Error('Параметры Supabase не найдены. Обновите страницу с Ctrl + Shift + R.');
   const response = await fetch(new URL(path, config.url), {
     ...options,
     headers: {
@@ -63,12 +72,11 @@ async function adminModeRequest(path, options = {}, token = null) {
 }
 
 function adminModeSaveSession(session) {
-  const compact = {
+  sessionStorage.setItem(adminModeSessionKey, JSON.stringify({
     access_token: session.access_token,
     expires_at: session.expires_at,
     user: { email: session.user?.email || '', id: session.user?.id || '' }
-  };
-  sessionStorage.setItem(adminModeSessionKey, JSON.stringify(compact));
+  }));
 }
 
 function adminModeReadSession() {
@@ -82,30 +90,9 @@ function adminModeReadSession() {
   }
 }
 
-function adminModeToggleDrawer(open = !adminModeState.open) {
-  adminModeState.open = open;
-  adminModeState.shell?.classList.toggle('is-open', open);
-  adminModeState.drawer?.setAttribute('aria-hidden', String(!open));
-}
-
-function adminModeParseSource() {
-  try {
-    const content = JSON.parse(adminModeState.source.value);
-    if (!content || typeof content !== 'object' || !Array.isArray(content.apps) || !content.recipes || !content.models) {
-      throw new Error('Нужен полный JSON справочника: apps, recipes и models не должны быть удалены.');
-    }
-    return content;
-  } catch (error) {
-    throw new Error(error instanceof SyntaxError ? 'JSON содержит ошибку. Проверьте запятые, кавычки и скобки.' : error.message);
-  }
-}
-
-function adminModeWriteSource(catalog) {
-  adminModeState.source.value = JSON.stringify(catalog, null, 2);
-}
-
 async function adminModeReadPublished() {
-  const endpoint = new URL('/rest/v1/site_content', adminModeConfig().url);
+  const config = adminModeConfig();
+  const endpoint = new URL('/rest/v1/site_content', config.url);
   endpoint.searchParams.set('select', 'content,updated_at');
   endpoint.searchParams.set('id', 'eq.main');
   const rows = await adminModeRequest(`${endpoint.pathname}${endpoint.search}`, {}, adminModeState.session?.access_token);
@@ -113,14 +100,140 @@ async function adminModeReadPublished() {
   return row?.content && typeof row.content === 'object' && Array.isArray(row.content.apps) ? row.content : null;
 }
 
-function adminModeRenderLogin() {
-  const panel = adminModeClear(adminModeState.drawer);
-  const head = adminModeNode('div', 'admin-mode__head');
-  head.append(adminModeNode('p', 'admin-mode__eyebrow', 'Режим редактирования'), adminModeCloseButton());
-  panel.append(head);
-  panel.append(adminModeNode('h2', 'admin-mode__title', 'Войти как администратор'));
-  panel.append(adminModeNode('p', 'admin-mode__lead', 'Страница остаётся обычным справочником. Вход нужен только для изменения и публикации данных.'));
+function adminModeCloseDialog() {
+  if (adminModeState.dialog) adminModeState.dialog.hidden = true;
+}
 
+function adminModeOpenDialog() {
+  if (!adminModeState.dialog) return;
+  adminModeState.dialog.hidden = false;
+  adminModeState.dialog.querySelector('input[type="email"]')?.focus();
+}
+
+function adminModeEnterEditing() {
+  if (!adminModeState.app) return;
+  adminModeState.active = true;
+  adminModeState.baseline = adminModeClone(adminModeState.app.getCatalog());
+  adminModeState.app.setInlineEditing(true);
+  document.body.classList.add('is-inline-editing');
+  adminModeState.shell.classList.add('is-editing');
+  adminModeState.trigger.hidden = true;
+  adminModeState.toolbar.hidden = false;
+  adminModeCloseDialog();
+  adminModeSetDirty(false);
+  adminModeSetStatus('Кликайте по тексту, коду или полям и редактируйте прямо на странице.', 'success');
+}
+
+function adminModeExitEditing() {
+  if (adminModeState.dirty && !window.confirm('Несохранённые изменения будут потеряны. Выйти из режима редактирования?')) return;
+  adminModeState.app?.setInlineEditing(false);
+  document.body.classList.remove('is-inline-editing');
+  adminModeState.active = false;
+  adminModeState.dirty = false;
+  adminModeState.baseline = null;
+  sessionStorage.removeItem(adminModeSessionKey);
+  adminModeState.session = null;
+  adminModeState.shell.classList.remove('is-editing');
+  adminModeState.toolbar.hidden = true;
+  adminModeState.trigger.hidden = false;
+  adminModeSetStatus('');
+}
+
+function adminModeDefaultForAction(action) {
+  if (action === 'add-step') return {
+    t: { ru: 'Новый шаг' },
+    p: { ru: 'Опишите действие' },
+    fields: [['Новое поле', 'Значение']],
+    code: { ru: '# Вставьте команду или код' }
+  };
+  if (action === 'add-field') return ['Новое поле', 'Значение'];
+  if (action === 'add-note') return { ru: 'Новая сноска' };
+  if (action === 'add-tip') return { title: 'Новый совет', body: 'Опишите полезную настройку.' };
+  if (action === 'add-error') return {
+    id: 'new-error',
+    title: 'Новая ошибка',
+    symptoms: 'Опишите, что видит пользователь.',
+    reason: 'Опишите причину.',
+    fix: ['Опишите решение.']
+  };
+  if (action === 'add-fix') return 'Новый пункт решения.';
+  if (action === 'add-model') return { id: 'new-model-id', name: 'Новая модель', kind: 'Текст / код' };
+  return '';
+}
+
+function adminModeHandleInlineAction(trigger) {
+  const action = trigger.dataset.inlineAction;
+  const path = trigger.dataset.inlinePath;
+  if (!action || !path || !adminModeState.app) return;
+  if (action === 'remove') adminModeState.app.removePath(path);
+  else adminModeState.app.appendPath(path, adminModeDefaultForAction(action));
+  adminModeSetDirty(true);
+}
+
+async function adminModeSave() {
+  const saveButton = adminModeState.toolbar?.querySelector('[data-admin-save]');
+  if (!adminModeState.app || !adminModeState.session) return;
+  saveButton.disabled = true;
+  adminModeSetStatus('Сохраняем изменения…');
+  try {
+    const catalog = adminModeState.app.getCatalog();
+    catalog.meta = {
+      ...(catalog.meta || {}),
+      source: 'supabase',
+      gatewayUrl: catalog.meta?.gatewayUrl || 'https://api.aikeysforyou.com',
+      updatedAt: new Date().toISOString()
+    };
+    const result = await adminModeRequest('/rest/v1/site_content?on_conflict=id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify([{ id: 'main', content: catalog }])
+    }, adminModeState.session.access_token);
+    const saved = Array.isArray(result) ? result[0]?.content : null;
+    adminModeState.app.setCatalog(saved || catalog);
+    adminModeState.baseline = adminModeClone(saved || catalog);
+    adminModeSetDirty(false);
+    adminModeSetStatus('Опубликовано. Обычные посетители увидят изменения после обновления страницы.', 'success');
+  } catch (error) {
+    adminModeSetStatus(error.message || 'Не удалось сохранить.', 'error');
+  } finally {
+    saveButton.disabled = false;
+  }
+}
+
+async function adminModeRestore() {
+  const restoreButton = adminModeState.toolbar?.querySelector('[data-admin-restore]');
+  if (!adminModeState.app) return;
+  restoreButton.disabled = true;
+  adminModeSetStatus('Возвращаем опубликованную версию…');
+  try {
+    const published = await adminModeReadPublished();
+    const catalog = published || adminModeState.baseline || adminModeState.app.getCatalog();
+    adminModeState.app.setCatalog(catalog);
+    adminModeState.baseline = adminModeClone(catalog);
+    adminModeSetDirty(false);
+    adminModeSetStatus(published ? 'Возвращена опубликованная версия.' : 'Публикаций ещё нет — возвращена исходная версия.', 'success');
+  } catch (error) {
+    adminModeSetStatus(error.message || 'Не удалось вернуть изменения.', 'error');
+  } finally {
+    restoreButton.disabled = false;
+  }
+}
+
+function adminModeBuildLogin() {
+  const overlay = adminModeNode('div', 'admin-mode__login-overlay');
+  overlay.hidden = true;
+  const panel = adminModeNode('section', 'admin-mode__login-card');
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-labelledby', 'admin-login-title');
+  const close = adminModeNode('button', 'admin-mode__close', '×');
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Закрыть вход');
+  close.addEventListener('click', adminModeCloseDialog);
+  panel.append(close, adminModeNode('p', 'admin-mode__eyebrow', 'Режим редактирования'));
+  const title = adminModeNode('h2', 'admin-mode__title', 'Войти для правки сайта');
+  title.id = 'admin-login-title';
+  panel.append(title, adminModeNode('p', 'admin-mode__lead', 'После входа этот же сайт станет редактируемым: кликните на любой текст или код прямо на странице.'));
   const form = adminModeNode('form', 'admin-mode__login');
   const emailLabel = adminModeNode('label', '');
   emailLabel.append(adminModeNode('span', '', 'Email'));
@@ -141,10 +254,10 @@ function adminModeRenderLogin() {
   const submit = adminModeNode('button', 'admin-mode__primary', 'Войти и редактировать');
   submit.type = 'submit';
   form.append(emailLabel, passwordLabel, submit);
-  panel.append(form);
-  panel.append(adminModeNode('p', 'admin-mode__note', 'Нет регистрации для посетителей. Админ-пользователь создаётся только в панели Supabase.'));
-  panel.append(adminModeStatusNode());
-
+  const loginStatus = adminModeNode('p', 'admin-mode__status');
+  loginStatus.setAttribute('aria-live', 'polite');
+  adminModeState.loginStatus = loginStatus;
+  panel.append(form, adminModeNode('p', 'admin-mode__note', 'У обычных посетителей нет ни входа, ни доступа к редактированию.'), loginStatus);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submit.disabled = true;
@@ -155,138 +268,100 @@ function adminModeRenderLogin() {
         body: JSON.stringify({ email: email.value.trim(), password: password.value })
       });
       if (!session?.access_token || !session?.user) throw new Error('Supabase не вернул сессию входа.');
-      const isAdmin = await adminModeRequest('/rest/v1/rpc/is_site_admin', {
-        method: 'POST',
-        body: '{}'
-      }, session.access_token);
+      const isAdmin = await adminModeRequest('/rest/v1/rpc/is_site_admin', { method: 'POST', body: '{}' }, session.access_token);
       if (isAdmin !== true) throw new Error('Вход выполнен, но этот пользователь не добавлен в список администраторов.');
       adminModeState.session = session;
       adminModeSaveSession(session);
-      adminModeRenderEditor();
-      adminModeSetStatus('Вы вошли. Можно менять исходник справочника.', 'success');
+      adminModeEnterEditing();
     } catch (error) {
       adminModeSetStatus(error.message || 'Не удалось войти.', 'error');
     } finally {
       submit.disabled = false;
     }
   });
+  overlay.append(panel);
+  return overlay;
 }
 
-function adminModeCloseButton() {
-  const close = adminModeNode('button', 'admin-mode__close', '×');
-  close.type = 'button';
-  close.setAttribute('aria-label', 'Закрыть редактор');
-  close.addEventListener('click', () => adminModeToggleDrawer(false));
-  return close;
-}
-
-function adminModeStatusNode() {
-  const status = adminModeNode('p', 'admin-mode__status');
+function adminModeBuildToolbar() {
+  const toolbar = adminModeNode('aside', 'admin-mode__toolbar');
+  toolbar.hidden = true;
+  toolbar.setAttribute('aria-label', 'Управление редактированием');
+  const identity = adminModeNode('span', 'admin-mode__identity', 'Режим редактирования');
+  const status = adminModeNode('span', 'admin-mode__status');
   status.setAttribute('aria-live', 'polite');
-  adminModeState.status = status;
-  return status;
-}
-
-function adminModeRenderEditor() {
-  const panel = adminModeClear(adminModeState.drawer);
-  const head = adminModeNode('div', 'admin-mode__head');
-  const headCopy = document.createElement('div');
-  headCopy.append(adminModeNode('p', 'admin-mode__eyebrow', 'Исходник содержимого'), adminModeNode('strong', 'admin-mode__account', adminModeState.session?.user?.email || 'Администратор'));
-  head.append(headCopy, adminModeCloseButton());
-  panel.append(head);
-  panel.append(adminModeNode('h2', 'admin-mode__title', 'Редактируй прямо поверх сайта'));
-  panel.append(adminModeNode('p', 'admin-mode__lead', 'В этом JSON есть все инструкции, кодовые блоки, модели, ошибки, советы и подписи страницы. Нажми «Применить», чтобы сразу увидеть результат слева.'));
-
-  const actions = adminModeNode('div', 'admin-mode__actions');
-  const preview = adminModeNode('button', 'admin-mode__quiet', 'Применить предпросмотр');
-  preview.type = 'button';
-  const save = adminModeNode('button', 'admin-mode__primary', 'Сохранить и опубликовать');
-  save.type = 'button';
-  const restore = adminModeNode('button', 'admin-mode__quiet', 'Вернуть опубликованное');
+  const restore = adminModeNode('button', 'admin-mode__quiet', 'Отменить');
   restore.type = 'button';
-  actions.append(preview, save, restore);
-  panel.append(actions);
-
-  const sourceLabel = adminModeNode('label', 'admin-mode__source-label', 'JSON содержимого');
-  const source = document.createElement('textarea');
-  source.className = 'admin-mode__source';
-  source.spellcheck = false;
-  source.wrap = 'off';
-  source.setAttribute('aria-label', 'Исходный JSON справочника');
-  adminModeState.source = source;
-  sourceLabel.append(source);
-  panel.append(sourceLabel);
-  panel.append(adminModeNode('p', 'admin-mode__note', 'Не вставляй реальный API-ключ. В кодовых примерах оставляй {{KEY}}. HTML/CSS/JS самого сайта по-прежнему меняются через GitHub; здесь редактируется всё содержание сайта.'));
-  panel.append(adminModeStatusNode());
-
-  const initial = adminModeState.app.getCatalog();
-  if (initial) adminModeWriteSource(initial);
-
-  preview.addEventListener('click', () => {
-    try {
-      const catalog = adminModeParseSource();
-      adminModeState.app.setCatalog(catalog);
-      adminModeSetStatus('Предпросмотр применён. Проверь страницу и затем сохрани.', 'success');
-    } catch (error) {
-      adminModeSetStatus(error.message, 'error');
-    }
-  });
-
-  restore.addEventListener('click', async () => {
-    restore.disabled = true;
-    adminModeSetStatus('Загружаем опубликованную версию…');
-    try {
-      const published = await adminModeReadPublished();
-      const catalog = published || adminModeState.app.getCatalog();
-      adminModeState.app.setCatalog(catalog);
-      adminModeWriteSource(catalog);
-      adminModeSetStatus(published ? 'Загружена опубликованная версия.' : 'Публикаций ещё нет — показан текущий справочник.', 'success');
-    } catch (error) {
-      adminModeSetStatus(error.message, 'error');
-    } finally {
-      restore.disabled = false;
-    }
-  });
-
-  save.addEventListener('click', async () => {
-    save.disabled = true;
-    adminModeSetStatus('Сохраняем в Supabase…');
-    try {
-      const catalog = adminModeParseSource();
-      catalog.meta = {
-        ...(catalog.meta || {}),
-        source: 'supabase',
-        gatewayUrl: catalog.meta?.gatewayUrl || 'https://api.aikeysforyou.com',
-        updatedAt: new Date().toISOString()
-      };
-      const result = await adminModeRequest('/rest/v1/site_content?on_conflict=id', {
-        method: 'POST',
-        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
-        body: JSON.stringify([{ id: 'main', content: catalog }])
-      }, adminModeState.session.access_token);
-      const saved = Array.isArray(result) ? result[0]?.content : null;
-      adminModeState.app.setCatalog(saved || catalog);
-      adminModeWriteSource(saved || catalog);
-      adminModeSetStatus('Опубликовано. Посетители увидят изменения после обновления страницы.', 'success');
-    } catch (error) {
-      adminModeSetStatus(error.message || 'Не удалось сохранить.', 'error');
-    } finally {
-      save.disabled = false;
-    }
-  });
+  restore.dataset.adminRestore = 'true';
+  restore.addEventListener('click', adminModeRestore);
+  const save = adminModeNode('button', 'admin-mode__primary', 'Сохранить');
+  save.type = 'button';
+  save.dataset.adminSave = 'true';
+  save.addEventListener('click', adminModeSave);
+  const signout = adminModeNode('button', 'admin-mode__quiet', 'Выйти');
+  signout.type = 'button';
+  signout.addEventListener('click', adminModeExitEditing);
+  toolbar.append(identity, status, restore, save, signout);
+  adminModeState.status = status;
+  return toolbar;
 }
 
 function adminModeBuildShell() {
   const shell = adminModeNode('div', 'admin-mode');
-  const toggle = adminModeNode('button', 'admin-mode__toggle', 'Редактировать сайт');
-  toggle.type = 'button';
-  toggle.addEventListener('click', () => adminModeToggleDrawer());
-  const drawer = adminModeNode('aside', 'admin-mode__drawer');
-  drawer.setAttribute('aria-hidden', 'true');
-  shell.append(toggle, drawer);
+  const trigger = adminModeNode('button', 'admin-mode__toggle', 'Редактировать сайт');
+  trigger.type = 'button';
+  trigger.addEventListener('click', adminModeOpenDialog);
+  const dialog = adminModeBuildLogin();
+  const toolbar = adminModeBuildToolbar();
+  shell.append(trigger, dialog, toolbar);
   document.body.append(shell);
   adminModeState.shell = shell;
-  adminModeState.drawer = drawer;
+  adminModeState.trigger = trigger;
+  adminModeState.dialog = dialog;
+  adminModeState.toolbar = toolbar;
+}
+
+function adminModeBindInlineEvents() {
+  document.addEventListener('input', (event) => {
+    if (!adminModeState.active) return;
+    const editable = event.target.closest?.('[data-edit-path]');
+    if (!editable) return;
+    const value = editable instanceof HTMLInputElement || editable instanceof HTMLTextAreaElement
+      ? editable.value
+      : editable.textContent;
+    if (adminModeState.app.updatePath(editable.dataset.editPath, value)) adminModeSetDirty(true);
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!adminModeState.active) return;
+    const action = event.target.closest?.('[data-inline-action]');
+    if (action) {
+      event.preventDefault();
+      event.stopPropagation();
+      adminModeHandleInlineAction(action);
+      return;
+    }
+    if (event.target.closest?.('[data-edit-path]') && event.target.closest?.('a, button')) event.preventDefault();
+  });
+
+  document.addEventListener('paste', (event) => {
+    if (!adminModeState.active || !event.target.closest?.('[contenteditable="plaintext-only"]')) return;
+    event.preventDefault();
+    document.execCommand('insertText', false, event.clipboardData?.getData('text/plain') || '');
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's' && adminModeState.active) {
+      event.preventDefault();
+      adminModeSave();
+    }
+  });
+
+  window.addEventListener('beforeunload', (event) => {
+    if (!adminModeState.dirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
 }
 
 async function adminModeWaitForPublicApp() {
@@ -300,8 +375,8 @@ async function adminModeWaitForPublicApp() {
 
 async function adminModeInitialise() {
   adminModeBuildShell();
+  adminModeBindInlineEvents();
   if (!adminModeConfig()) {
-    adminModeRenderLogin();
     adminModeSetStatus('Параметры Supabase не найдены. Обновите страницу с Ctrl + Shift + R.', 'error');
     return;
   }
@@ -310,23 +385,11 @@ async function adminModeInitialise() {
     adminModeState.session = adminModeReadSession();
     if (adminModeState.session) {
       const isAdmin = await adminModeRequest('/rest/v1/rpc/is_site_admin', { method: 'POST', body: '{}' }, adminModeState.session.access_token);
-      if (isAdmin === true) {
-        adminModeRenderEditor();
-        return;
-      }
+      if (isAdmin === true) adminModeEnterEditing();
     }
-    adminModeRenderLogin();
   } catch (error) {
-    adminModeRenderLogin();
-    adminModeSetStatus(error.message || 'Не удалось загрузить редактор.', 'error');
+    adminModeSetStatus(error.message || 'Не удалось подготовить редактор.', 'error');
   }
 }
-
-window.addEventListener('keydown', (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's' && adminModeState.session && adminModeState.open) {
-    event.preventDefault();
-    adminModeState.drawer.querySelector('.admin-mode__primary')?.click();
-  }
-});
 
 adminModeInitialise();

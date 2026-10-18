@@ -133,6 +133,7 @@ function applyUiText() {
   document.querySelectorAll('[data-ui]').forEach((element) => {
     const value = uiText(element.dataset.ui, element.textContent || '');
     element.textContent = value;
+    makeEditable(element, `ui.${element.dataset.ui}`);
   });
   document.querySelectorAll('[data-ui-placeholder]').forEach((element) => {
     element.setAttribute('placeholder', uiText(element.dataset.uiPlaceholder, element.getAttribute('placeholder') || ''));
@@ -161,6 +162,68 @@ function node(tag, className, content) {
   if (className) element.className = className;
   if (content !== undefined) element.textContent = content;
   return element;
+}
+
+function inlineEditorActive() {
+  return window.__AIKEYS_DOCS_INLINE_EDITOR__?.active === true;
+}
+
+function pathKey(value, preferred = []) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return '';
+  const keys = Object.keys(value);
+  return preferred.find((key) => Object.prototype.hasOwnProperty.call(value, key)) || keys[0] || '';
+}
+
+function localizedPath(basePath, value) {
+  const key = pathKey(value, [state.osId, 'ru', 'en']);
+  return key ? `${basePath}.${key}` : basePath;
+}
+
+function propertyPath(basePath, source, properties, localized = false) {
+  const property = properties.find((key) => Object.prototype.hasOwnProperty.call(source || {}, key)) || properties[0];
+  const path = `${basePath}.${property}`;
+  return localized ? localizedPath(path, source?.[property]) : path;
+}
+
+function makeEditable(element, path) {
+  if (!path) return element;
+  if (!inlineEditorActive()) {
+    element.removeAttribute('contenteditable');
+    element.removeAttribute('data-edit-path');
+    element.classList.remove('inline-editable');
+    return element;
+  }
+
+  let target = element;
+  if (element.matches('a, button')) {
+    const textEditor = node('span', 'inline-editable', element.textContent);
+    element.replaceChildren(textEditor);
+    target = textEditor;
+  }
+  target.dataset.editPath = path;
+  target.setAttribute('contenteditable', 'plaintext-only');
+  target.setAttribute('spellcheck', 'true');
+  target.classList.add('inline-editable');
+  return target;
+}
+
+function editableNode(tag, className, content, path) {
+  return makeEditable(node(tag, className, content), path);
+}
+
+function editorAction(label, action, path, title = label) {
+  if (!inlineEditorActive()) return null;
+  const button = node('button', 'inline-editor-action', label);
+  button.type = 'button';
+  button.dataset.inlineAction = action;
+  if (path) button.dataset.inlinePath = path;
+  button.title = title;
+  return button;
+}
+
+function appendEditorAction(parent, label, action, path, title) {
+  const actionButton = editorAction(label, action, path, title);
+  if (actionButton) parent.append(actionButton);
 }
 
 function clear(element) {
@@ -211,12 +274,14 @@ function renderAppTabs() {
   if (!apps.some((app) => app.id === state.appId)) state.appId = apps[0]?.id || '';
   const parent = clear(elements.appTabs);
 
-  apps.forEach((app) => {
-    const button = node('button', 'app-tab', appTitle(app));
+  apps.forEach((app, index) => {
+    const button = node('button', 'app-tab');
     button.type = 'button';
     button.role = 'tab';
     button.setAttribute('aria-selected', String(app.id === state.appId));
-    button.addEventListener('click', () => {
+    button.append(editableNode('span', '', appTitle(app), propertyPath(`apps.${index}`, app, ['ru', 'name', 'title', 'en'])));
+    button.addEventListener('click', (event) => {
+      if (inlineEditorActive() && event.target.closest('[data-edit-path]')) return;
       state.appId = app.id;
       renderAppTabs();
       renderGuide();
@@ -230,12 +295,14 @@ function renderOsTabs() {
   if (!oses.some((os) => os.id === state.osId)) state.osId = oses[0]?.id || 'win';
   const parent = clear(elements.osTabs);
 
-  oses.forEach((os) => {
-    const button = node('button', 'segment-tab', text(os.ru ?? os.name ?? os.en, os.id));
+  oses.forEach((os, index) => {
+    const button = node('button', 'segment-tab');
     button.type = 'button';
     button.role = 'tab';
     button.setAttribute('aria-selected', String(os.id === state.osId));
-    button.addEventListener('click', () => {
+    button.append(editableNode('span', '', text(os.ru ?? os.name ?? os.en, os.id), propertyPath(`oses.${index}`, os, ['ru', 'name', 'en'])));
+    button.addEventListener('click', (event) => {
+      if (inlineEditorActive() && event.target.closest('[data-edit-path]')) return;
       state.osId = os.id;
       renderOsTabs();
       renderGuide();
@@ -244,9 +311,23 @@ function renderOsTabs() {
   });
 }
 
-function makeCodeBlock(rawCode) {
-  const codeValue = secureCode(rawCode);
+function makeCodeBlock(rawCode, path = '') {
+  const editing = inlineEditorActive() && path;
+  const codeValue = editing ? String(rawCode || '') : secureCode(rawCode);
   const wrap = node('div', 'code-wrap');
+
+  if (editing) {
+    const editor = document.createElement('textarea');
+    editor.className = 'inline-code-editor';
+    editor.value = codeValue;
+    editor.spellcheck = false;
+    editor.wrap = 'off';
+    editor.dataset.editPath = path;
+    editor.setAttribute('aria-label', 'Редактировать код');
+    wrap.append(editor);
+    return wrap;
+  }
+
   const pre = document.createElement('pre');
   const codeElement = document.createElement('code');
   codeElement.textContent = codeValue;
@@ -268,94 +349,121 @@ function normalizeFields(fields) {
         return [text(label), itemForOs(value)];
       }
       return ['', ''];
-    }).filter(([label, value]) => label && value);
+    }).filter(([label, value]) => inlineEditorActive() ? label || value : label && value);
   }
   if (fields && typeof fields === 'object') {
     return Object.entries(fields)
       .map(([label, value]) => [text(label), itemForOs(value)])
-      .filter(([label, value]) => label && value);
+      .filter(([label, value]) => inlineEditorActive() ? label || value : label && value);
   }
   return [];
 }
 
-function makeFieldsBlock(fields) {
+function makeFieldsBlock(fields, path = '') {
   const rows = normalizeFields(fields);
   if (!rows.length) return null;
 
+  const wrap = node('div', 'guide-fields-wrap');
   const list = node('dl', 'guide-fields');
-  rows.forEach(([label, value]) => {
+  rows.forEach(([label, value], index) => {
     const row = node('div', 'guide-field');
-    const term = node('dt', '', label);
+    const rawField = Array.isArray(fields) ? fields[index] : null;
+    const labelPath = Array.isArray(rawField) ? `${path}.${index}.0` : '';
+    const valuePath = Array.isArray(rawField) ? localizedPath(`${path}.${index}.1`, rawField[1]) : '';
+    const term = editableNode('dt', '', label, labelPath);
     const definition = document.createElement('dd');
-    const code = document.createElement('code');
-    code.textContent = secureCode(value);
+    const code = editableNode('code', '', inlineEditorActive() ? value : secureCode(value), valuePath);
     definition.append(code);
     row.append(term, definition);
+    if (Array.isArray(rawField)) appendEditorAction(row, '×', 'remove', `${path}.${index}`, 'Удалить поле');
     list.append(row);
   });
-  return list;
+  wrap.append(list);
+  if (Array.isArray(fields)) appendEditorAction(wrap, '+ Поле', 'add-field', path, 'Добавить поле');
+  return wrap;
 }
 
 function renderGuide() {
   const parent = clear(elements.guide);
   const recipe = state.catalog?.recipes?.[state.appId];
-  const selectedApp = (state.catalog?.apps || []).find((app) => app.id === state.appId);
+  const apps = state.catalog?.apps || [];
+  const appIndex = apps.findIndex((app) => app.id === state.appId);
+  const selectedApp = apps[appIndex];
+  const appPath = appIndex >= 0 ? propertyPath(`apps.${appIndex}`, selectedApp, ['ru', 'name', 'title', 'en']) : '';
 
   if (!recipe) {
     const header = node('div', 'guide-header');
     const copyBlock = document.createElement('div');
-    copyBlock.append(node('h3', '', appTitle(selectedApp)));
+    copyBlock.append(editableNode('h3', '', appTitle(selectedApp), appPath));
     copyBlock.append(node('p', '', `${uiText('noRecipe')} ${uiText('noRecipeTail')} ${gatewayUrl()} ${uiText('noRecipeEnd')}`));
     header.append(copyBlock, node('span', 'guide-meta', uiText('noRecipeMeta', 'проверьте настройки клиента')));
     parent.append(header);
     return;
   }
 
+  const recipePath = `recipes.${state.appId}`;
   const header = node('div', 'guide-header');
   const headerCopy = document.createElement('div');
-  headerCopy.append(node('h3', '', appTitle(selectedApp)));
-  headerCopy.append(node('p', '', text(recipe.intro)));
+  headerCopy.append(editableNode('h3', '', appTitle(selectedApp), appPath));
+  headerCopy.append(editableNode('p', '', text(recipe.intro), localizedPath(`${recipePath}.intro`, recipe.intro)));
   header.append(headerCopy, node('span', 'guide-meta', `${uiText('forSystem', 'для')} ${text((state.catalog.oses || []).find((os) => os.id === state.osId)?.ru, state.osId)}`));
   parent.append(header);
 
   const steps = node('div', 'steps');
   const sourceSteps = Array.isArray(recipe.steps) ? recipe.steps : [];
   sourceSteps.forEach((step, index) => {
+    const stepPath = `${recipePath}.steps.${index}`;
     const stepElement = node('section', 'step');
     stepElement.append(node('span', 'step-index', String(index + 1).padStart(2, '0')));
     const body = document.createElement('div');
-    body.append(node('h4', '', text(step.t ?? step.title, `${uiText('stepPrefix', 'Шаг')} ${index + 1}`)));
-    const description = itemForOs(step.p ?? step.description);
-    if (description) body.append(node('p', '', description));
-    const fields = makeFieldsBlock(step.fields);
+    body.append(editableNode('h4', '', text(step.t ?? step.title, `${uiText('stepPrefix', 'Шаг')} ${index + 1}`), propertyPath(stepPath, step, ['t', 'title'], true)));
+    const descriptionSource = step.p ?? step.description;
+    const descriptionPath = propertyPath(stepPath, step, ['p', 'description'], true);
+    const description = itemForOs(descriptionSource);
+    if (description || inlineEditorActive()) body.append(editableNode('p', '', description || 'Опишите действие', descriptionPath));
+    const fields = makeFieldsBlock(step.fields, `${stepPath}.fields`);
     if (fields) body.append(fields);
+    else appendEditorAction(body, '+ Поле', 'add-field', `${stepPath}.fields`, 'Добавить поле');
+    const codePath = localizedPath(`${stepPath}.code`, step.code);
     const code = itemForOs(step.code);
-    if (code) body.append(makeCodeBlock(code));
+    if (code || inlineEditorActive()) body.append(makeCodeBlock(code, codePath));
+    const tip = itemForOs(step.tip);
+    if (tip || inlineEditorActive()) body.append(editableNode('p', 'inline-editable-note', tip || 'Подсказка или сноска', localizedPath(`${stepPath}.tip`, step.tip)));
     stepElement.append(body);
+    appendEditorAction(stepElement, '×', 'remove', stepPath, 'Удалить шаг');
     steps.append(stepElement);
   });
+  appendEditorAction(steps, '+ Шаг', 'add-step', `${recipePath}.steps`, 'Добавить шаг');
   parent.append(steps);
 
   const after = Array.isArray(recipe.after) ? recipe.after : [];
-  if (after.length) {
+  if (after.length || inlineEditorActive()) {
     const afterBox = node('aside', 'guide-after');
-    after.forEach((note) => afterBox.append(node('p', '', itemForOs(note))));
+    after.forEach((note, index) => {
+      const noteRow = node('div', 'inline-editable-row');
+      noteRow.append(editableNode('p', '', itemForOs(note), localizedPath(`${recipePath}.after.${index}`, note)));
+      appendEditorAction(noteRow, '×', 'remove', `${recipePath}.after.${index}`, 'Удалить сноску');
+      afterBox.append(noteRow);
+    });
+    appendEditorAction(afterBox, '+ Сноска', 'add-note', `${recipePath}.after`, 'Добавить сноску');
     parent.append(afterBox);
   }
 }
 
 function allModelGroups() {
   const models = state.catalog?.models || {};
-  const providerGroups = (Array.isArray(models.providers) ? models.providers : []).map((provider) => ({
+  const providerGroups = (Array.isArray(models.providers) ? models.providers : []).map((provider, index) => ({
     name: text(provider.name ?? provider.ru, 'Провайдер'),
+    namePath: propertyPath(`models.providers.${index}`, provider, ['name', 'ru']),
+    modelsPath: `models.providers.${index}.models`,
     type: 'text',
     models: Array.isArray(provider.models) ? provider.models : []
   }));
   const singleGroups = [
-    ['Изображения', 'image', models.images],
-    ['Видео', 'video', models.video]
-  ].filter(([, , modelList]) => Array.isArray(modelList) && modelList.length)
-    .map(([name, type, modelList]) => ({ name, type, models: modelList }));
+    ['Изображения', 'image', models.images, 'models.images'],
+    ['Видео', 'video', models.video, 'models.video']
+  ].filter(([, , modelList]) => Array.isArray(modelList))
+    .map(([name, type, modelList, modelsPath]) => ({ name, type, models: modelList, modelsPath }));
   return [...providerGroups, ...singleGroups];
 }
 
@@ -387,26 +495,35 @@ function renderModels() {
   const parent = clear(elements.modelsGrid);
   let total = 0;
   allModelGroups().forEach((group) => {
-    const models = group.models.filter((model) => matchesModel(model, group));
-    if (!models.length) return;
+    const models = group.models
+      .map((model, index) => ({ model, index }))
+      .filter(({ model }) => matchesModel(model, group));
+    if (!models.length && !inlineEditorActive()) return;
     total += models.length;
     const card = node('article', 'provider-card');
     const header = node('header', 'provider-card__header');
-    header.append(node('h3', '', group.name), node('span', '', `${models.length} ${models.length === 1 ? uiText('modelOne', 'модель') : uiText('modelMany', 'моделей')}`));
+    header.append(editableNode('h3', '', group.name, group.namePath), node('span', '', `${models.length} ${models.length === 1 ? uiText('modelOne', 'модель') : uiText('modelMany', 'моделей')}`));
     const list = node('ul', 'model-rows');
-    models.forEach((model) => {
+    models.forEach(({ model, index }) => {
+      const modelPath = `${group.modelsPath}.${index}`;
       const row = node('li', 'model-row');
       const info = document.createElement('div');
-      info.append(node('span', 'model-name', text(model.name ?? model.ru, model.id)));
-      const idButton = node('button', 'model-id', text(model.id));
-      idButton.type = 'button';
-      idButton.title = uiText('copyModelId', 'Скопировать Model ID');
-      idButton.addEventListener('click', () => copy(text(model.id), idButton));
-      info.append(idButton);
-      row.append(info, node('span', 'model-kind', text(model.kind, modelFilterLabel(group.type))));
+      info.append(editableNode('span', 'model-name', text(model.name ?? model.ru, model.id), propertyPath(modelPath, model, ['name', 'ru'])));
+      if (inlineEditorActive()) {
+        info.append(editableNode('code', 'model-id', text(model.id), `${modelPath}.id`));
+      } else {
+        const idButton = node('button', 'model-id', text(model.id));
+        idButton.type = 'button';
+        idButton.title = uiText('copyModelId', 'Скопировать Model ID');
+        idButton.addEventListener('click', () => copy(text(model.id), idButton));
+        info.append(idButton);
+      }
+      row.append(info, editableNode('span', 'model-kind', text(model.kind, modelFilterLabel(group.type)), `${modelPath}.kind`));
+      appendEditorAction(row, '×', 'remove', modelPath, 'Удалить модель');
       list.append(row);
     });
     card.append(header, list);
+    appendEditorAction(card, '+ Модель', 'add-model', group.modelsPath, 'Добавить модель');
     parent.append(card);
   });
   elements.modelsEmpty.hidden = total !== 0;
@@ -420,17 +537,21 @@ function renderSavings() {
       savings.intro,
       uiText('savingsIntroFallback', 'Несколько простых настроек помогают не расходовать контекст впустую.')
     );
+    makeEditable(elements.savingsIntro, localizedPath('savings.intro', savings.intro));
   }
   if (!elements.savingsList) return;
 
   const parent = clear(elements.savingsList);
   tips.forEach((tip, index) => {
+    const tipPath = `savings.tips.${index}`;
     const card = node('article', 'savings-card');
     card.append(node('span', 'savings-index', String(index + 1).padStart(2, '0')));
-    card.append(node('h3', '', text(tip.title ?? tip.t, `${uiText('tipPrefix', 'Совет')} ${index + 1}`)));
-    card.append(node('p', '', text(tip.body ?? tip.p ?? tip.description)));
+    card.append(editableNode('h3', '', text(tip.title ?? tip.t, `${uiText('tipPrefix', 'Совет')} ${index + 1}`), propertyPath(tipPath, tip, ['title', 't'], true)));
+    card.append(editableNode('p', '', text(tip.body ?? tip.p ?? tip.description), propertyPath(tipPath, tip, ['body', 'p', 'description'], true)));
+    appendEditorAction(card, '×', 'remove', tipPath, 'Удалить совет');
     parent.append(card);
   });
+  appendEditorAction(parent, '+ Совет', 'add-tip', 'savings.tips', 'Добавить совет');
 }
 
 function listFromError(error) {
@@ -449,40 +570,54 @@ function normalizedErrors() {
 
 function renderErrors() {
   const parent = clear(elements.errorList);
-  normalizedErrors().forEach((error) => {
+  const sourceErrors = state.catalog?.errors;
+  const errorsAreArray = Array.isArray(sourceErrors);
+  normalizedErrors().forEach((error, index) => {
+    const errorPath = errorsAreArray ? `errors.${index}` : '';
     const item = node('article', 'error-item');
     item.classList.add('is-open');
     const summary = node('button', 'error-summary');
     summary.type = 'button';
     summary.setAttribute('aria-expanded', 'true');
     const caption = document.createElement('div');
-    caption.append(node('strong', '', text(error.title ?? error.t ?? error.id, uiText('fallbackErrorTitle', 'Ошибка подключения'))));
-    caption.append(node('span', '', text(error.symptoms ?? error.description ?? error.p, uiText('fallbackErrorDescription', 'Откройте карточку для решения.'))));
+    caption.append(editableNode('strong', '', text(error.title ?? error.t ?? error.id, uiText('fallbackErrorTitle', 'Ошибка подключения')), errorPath ? propertyPath(errorPath, error, ['title', 't', 'id'], true) : ''));
+    caption.append(editableNode('span', '', text(error.symptoms ?? error.description ?? error.p, uiText('fallbackErrorDescription', 'Откройте карточку для решения.')), errorPath ? propertyPath(errorPath, error, ['symptoms', 'description', 'p'], true) : ''));
     summary.append(caption, node('span', 'error-chevron', '+'));
     const details = node('div', 'error-details');
     const detailsInner = document.createElement('div');
     const inside = node('div', 'error-details__inside');
     const reason = text(error.reason ?? error.cause);
-    if (reason) {
-      inside.append(node('p', 'error-reason', reason));
+    if (reason || (inlineEditorActive() && errorPath)) {
+      inside.append(editableNode('p', 'error-reason', reason, errorPath ? propertyPath(errorPath, error, ['reason', 'cause'], true) : ''));
     }
     const fixes = listFromError(error);
-    fixes.forEach((fix) => inside.append(node('p', 'error-fix', text(fix))));
+    fixes.forEach((fix, fixIndex) => {
+      const fixPath = errorPath && Array.isArray(error.fix) ? localizedPath(`${errorPath}.fix.${fixIndex}`, error.fix[fixIndex]) : '';
+      const fixRow = node('div', 'inline-editable-row');
+      fixRow.append(editableNode('p', 'error-fix', text(fix), fixPath));
+      if (fixPath) appendEditorAction(fixRow, '×', 'remove', `${errorPath}.fix.${fixIndex}`, 'Удалить пункт');
+      inside.append(fixRow);
+    });
+    if (errorPath) appendEditorAction(inside, '+ Пункт', 'add-fix', `${errorPath}.fix`, 'Добавить пункт решения');
     detailsInner.append(inside);
     details.append(detailsInner);
-    summary.addEventListener('click', () => {
+    summary.addEventListener('click', (event) => {
+      if (inlineEditorActive() && event.target.closest('[data-edit-path]')) return;
       const open = item.classList.toggle('is-open');
       summary.setAttribute('aria-expanded', String(open));
     });
     item.append(summary, details);
+    if (errorPath) appendEditorAction(item, '×', 'remove', errorPath, 'Удалить ошибку');
     parent.append(item);
   });
+  if (errorsAreArray || !sourceErrors) appendEditorAction(parent, '+ Ошибка', 'add-error', 'errors', 'Добавить ошибку');
 }
 
 function setMetadata() {
   const meta = state.catalog?.meta || {};
   const gateway = meta.gatewayUrl || 'https://api.aikeysforyou.com';
   elements.gateway.textContent = gateway;
+  makeEditable(elements.gateway, 'meta.gatewayUrl');
   const updated = meta.updatedAt ? new Date(meta.updatedAt) : null;
   const timestamp = updated && !Number.isNaN(updated.valueOf())
     ? updated.toLocaleString('ru-RU', { dateStyle: 'medium', timeStyle: 'short' })
@@ -508,6 +643,7 @@ function renderAll() {
   renderModels();
   renderSavings();
   renderErrors();
+  document.dispatchEvent(new Event('aikeys:rendered'));
 }
 
 function showFatalError() {
@@ -640,9 +776,50 @@ async function initialise() {
   }
 }
 
-// The admin route uses the same public renderer. It only receives a small,
-// deliberate API for previewing and saving JSON content; it never exposes a
-// way to edit the site's JavaScript or CSS from the browser.
+function splitCatalogPath(path) {
+  return String(path || '').split('.').filter(Boolean);
+}
+
+function readCatalogPath(path) {
+  return splitCatalogPath(path).reduce((value, key) => value?.[key], state.catalog);
+}
+
+function writeCatalogPath(path, value) {
+  const parts = splitCatalogPath(path);
+  if (!parts.length || !state.catalog) return false;
+  let target = state.catalog;
+  parts.slice(0, -1).forEach((part, index) => {
+    const nextPart = parts[index + 1];
+    if (!target[part] || typeof target[part] !== 'object') target[part] = /^\d+$/.test(nextPart) ? [] : {};
+    target = target[part];
+  });
+  target[parts.at(-1)] = value;
+  return true;
+}
+
+function removeCatalogPath(path) {
+  const parts = splitCatalogPath(path);
+  if (!parts.length || !state.catalog) return false;
+  const key = parts.at(-1);
+  const parent = parts.slice(0, -1).reduce((value, part) => value?.[part], state.catalog);
+  if (!parent || typeof parent !== 'object') return false;
+  if (Array.isArray(parent) && /^\d+$/.test(key)) parent.splice(Number(key), 1);
+  else delete parent[key];
+  return true;
+}
+
+function appendCatalogPath(path, value) {
+  let target = readCatalogPath(path);
+  if (!Array.isArray(target)) {
+    if (!writeCatalogPath(path, [])) return false;
+    target = readCatalogPath(path);
+  }
+  target.push(value);
+  return true;
+}
+
+// The admin route uses the same public renderer. It exposes content-only
+// editing helpers; HTML, CSS and JavaScript never become editable in-browser.
 window.__AIKEYS_DOCS_APP__ = {
   getCatalog() {
     return state.catalog ? JSON.parse(JSON.stringify(state.catalog)) : null;
@@ -652,6 +829,26 @@ window.__AIKEYS_DOCS_APP__ = {
     state.catalog = withUi(catalog);
     renderAll();
     return true;
+  },
+  setInlineEditing(active) {
+    window.__AIKEYS_DOCS_INLINE_EDITOR__ = { active: Boolean(active) };
+    renderAll();
+  },
+  updatePath(path, value) {
+    return writeCatalogPath(path, value);
+  },
+  appendPath(path, value) {
+    const changed = appendCatalogPath(path, value);
+    if (changed) renderAll();
+    return changed;
+  },
+  removePath(path) {
+    const changed = removeCatalogPath(path);
+    if (changed) renderAll();
+    return changed;
+  },
+  refresh() {
+    renderAll();
   }
 };
 
