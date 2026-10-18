@@ -375,9 +375,15 @@ function setMetadata() {
   const timestamp = updated && !Number.isNaN(updated.valueOf())
     ? updated.toLocaleString('ru-RU', { dateStyle: 'medium', timeStyle: 'short' })
     : 'локальные данные';
-  const source = meta.source === 'upstream' ? 'Каталог обновлён' : 'Справочник доступен офлайн';
+  const source = meta.source === 'supabase'
+    ? 'Справочник обновлён'
+    : meta.source === 'upstream'
+      ? 'Каталог обновлён'
+      : 'Справочник доступен офлайн';
   elements.catalogStatus.textContent = `${source} · ${timestamp}`;
-  elements.footerUpdated.textContent = meta.source === 'upstream' ? `каталог обновлён ${timestamp}` : 'резервный каталог';
+  elements.footerUpdated.textContent = (meta.source === 'upstream' || meta.source === 'supabase')
+    ? `каталог обновлён ${timestamp}`
+    : 'резервный каталог';
 }
 
 function renderAll() {
@@ -429,6 +435,46 @@ function applySiteConfig() {
   }
 }
 
+function supabaseConfig() {
+  const config = window.__AIKEYS_SITE_CONFIG__?.supabase;
+  if (!config || typeof config.url !== 'string' || typeof config.publishableKey !== 'string') return null;
+  const url = config.url.replace(/\/$/, '');
+  const publishableKey = config.publishableKey.trim();
+  return url && publishableKey ? { url, publishableKey } : null;
+}
+
+async function loadSupabaseCatalog() {
+  const config = supabaseConfig();
+  if (!config) return null;
+
+  const endpoint = new URL('/rest/v1/site_content', config.url);
+  endpoint.searchParams.set('select', 'content,updated_at');
+  endpoint.searchParams.set('id', 'eq.main');
+
+  const response = await fetch(endpoint, {
+    headers: {
+      apikey: config.publishableKey,
+      Authorization: `Bearer ${config.publishableKey}`,
+      Accept: 'application/json'
+    }
+  });
+
+  if (!response.ok) throw new Error(`Supabase catalog request failed: ${response.status}`);
+  const rows = await response.json();
+  const row = Array.isArray(rows) ? rows[0] : null;
+  if (!row?.content || typeof row.content !== 'object' || !Array.isArray(row.content.apps)) return null;
+
+  return {
+    ...row.content,
+    meta: {
+      ...(row.content.meta || {}),
+      source: 'supabase',
+      updatedAt: row.updated_at || row.content.meta?.updatedAt || new Date().toISOString(),
+      gatewayUrl: row.content.meta?.gatewayUrl || 'https://api.aikeysforyou.com'
+    }
+  };
+}
+
 async function initialise() {
   const loading = document.querySelector('#loading-guide').content.cloneNode(true);
   elements.guide.append(loading);
@@ -445,6 +491,19 @@ async function initialise() {
     renderAll();
     return true;
   };
+
+  // Supabase is the published source of truth. The bundled catalog remains a
+  // safe offline fallback for GitHub Pages and a directly opened file.
+  try {
+    const publishedCatalog = await loadSupabaseCatalog();
+    if (publishedCatalog) {
+      state.catalog = publishedCatalog;
+      renderAll();
+      return;
+    }
+  } catch (error) {
+    console.info('Published catalog is not available yet; using fallback.', error);
+  }
 
   // GitHub Pages and a directly opened file have no Node.js API route.
   if (location.protocol === 'file:' || location.hostname.endsWith('github.io')) {
