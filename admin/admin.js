@@ -1,5 +1,5 @@
 const siteConfig = window.__AIKEYS_SITE_CONFIG__ || {};
-const defaultGateway = 'https://api.aikeysforyou.com';
+const defaultGateway = 'https://api.rootgateway.com';
 const sessionKey = 'aikeys-docs-admin-session';
 
 const elements = {

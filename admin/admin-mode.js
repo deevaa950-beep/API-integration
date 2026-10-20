@@ -120,8 +120,14 @@ function adminModeEnterEditing() {
   adminModeState.trigger.hidden = true;
   adminModeState.toolbar.hidden = false;
   adminModeCloseDialog();
-  adminModeSetDirty(false);
-  adminModeSetStatus('Кликайте по тексту, коду или полям и редактируйте прямо на странице.', 'success');
+  const needsGatewayMigration = adminModeState.app.needsGatewayUrlMigration?.() === true;
+  adminModeSetDirty(needsGatewayMigration);
+  adminModeSetStatus(
+    needsGatewayMigration
+      ? 'Устаревшие Base URL уже заменены на api.rootgateway.com. Нажмите «Сохранить», чтобы закрепить это в Supabase.'
+      : 'Кликайте по тексту, коду или полям и редактируйте прямо на странице.',
+    'success'
+  );
 }
 
 function adminModeExitEditing() {
@@ -166,7 +172,10 @@ function adminModeHandleInlineAction(trigger) {
   const path = trigger.dataset.inlinePath;
   if (!action || !path || !adminModeState.app) return;
   if (action === 'remove') adminModeState.app.removePath(path);
-  else adminModeState.app.appendPath(path, adminModeDefaultForAction(action));
+  else if (action === 'toggle-hidden') {
+    adminModeState.app.updatePath(path, !Boolean(adminModeState.app.readPath?.(path)));
+    adminModeState.app.refresh();
+  } else adminModeState.app.appendPath(path, adminModeDefaultForAction(action));
   adminModeSetDirty(true);
 }
 
@@ -180,7 +189,7 @@ async function adminModeSave() {
     catalog.meta = {
       ...(catalog.meta || {}),
       source: 'supabase',
-      gatewayUrl: catalog.meta?.gatewayUrl || 'https://api.aikeysforyou.com',
+      gatewayUrl: catalog.meta?.gatewayUrl || 'https://api.rootgateway.com',
       updatedAt: new Date().toISOString()
     };
     const result = await adminModeRequest('/rest/v1/site_content?on_conflict=id', {
@@ -210,8 +219,14 @@ async function adminModeRestore() {
     const catalog = published || adminModeState.baseline || adminModeState.app.getCatalog();
     adminModeState.app.setCatalog(catalog);
     adminModeState.baseline = adminModeClone(catalog);
-    adminModeSetDirty(false);
-    adminModeSetStatus(published ? 'Возвращена опубликованная версия.' : 'Публикаций ещё нет — возвращена исходная версия.', 'success');
+    const needsGatewayMigration = adminModeState.app.needsGatewayUrlMigration?.() === true;
+    adminModeSetDirty(needsGatewayMigration);
+    adminModeSetStatus(
+      needsGatewayMigration
+        ? 'Возвращена опубликованная версия. Устаревшие Base URL заменены в рабочей копии — нажмите «Сохранить», чтобы закрепить это.'
+        : (published ? 'Возвращена опубликованная версия.' : 'Публикаций ещё нет — возвращена исходная версия.'),
+      'success'
+    );
   } catch (error) {
     adminModeSetStatus(error.message || 'Не удалось вернуть изменения.', 'error');
   } finally {
