@@ -106,6 +106,7 @@ h2 { margin-bottom: 0; font-size: clamp(32px, 4.1vw, 48px); letter-spacing: -.05
 
 .guide-card { min-height: 390px; padding: clamp(26px, 4vw, 48px); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 13px 13px; background: #171310; }
 .guide-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: start; padding-bottom: 30px; border-bottom: 1px solid var(--line); }
+.guide-header__aside { display: grid; justify-items: end; gap: 8px; }
 .guide-header h3 { margin-bottom: 10px; color: #fff7f0; font-size: clamp(25px, 3.5vw, 37px); letter-spacing: -.05em; line-height: 1.05; }
 .guide-header p { max-width: 640px; margin-bottom: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
 .guide-meta { display: flex; align-items: center; gap: 8px; color: var(--subtle); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; white-space: nowrap; }
@@ -148,6 +149,7 @@ h2 { margin-bottom: 0; font-size: clamp(32px, 4.1vw, 48px); letter-spacing: -.05
 .models-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .provider-card { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: rgba(28,23,19,.62); }
 .provider-card__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 18px 15px; border-bottom: 1px solid var(--line); }
+.provider-card__meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .provider-card__header h3 { margin: 0; color: #f1e7de; font-size: 15px; letter-spacing: -.02em; }
 .provider-card__header span { color: var(--subtle); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; }
 .model-rows { list-style: none; margin: 0; padding: 5px 0; }

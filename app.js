@@ -4,8 +4,11 @@ const state = {
   osId: 'win',
   modelQuery: '',
   modelFilter: 'all',
-  key: ''
+  key: '',
+  gatewayUrlsMigrated: false
 };
+
+const ROOT_GATEWAY_URL = 'https://api.rootgateway.com';
 
 const elements = {
   appTabs: document.querySelector('#app-tabs'),
@@ -113,13 +116,40 @@ const defaultUi = Object.freeze({
   fallbackErrorTwo: 'Перезапустите приложение после изменения настроек.'
 });
 
+function normalizeGatewayAddress(value) {
+  if (typeof value !== 'string') return value;
+  return value
+    .replace(/https?:\/\/api\.aikeysforyou\.com/gi, ROOT_GATEWAY_URL)
+    .replace(/api\.aikeysforyou\.com/gi, 'api.rootgateway.com');
+}
+
+function normalizeGatewayAddresses(value, changes = { changed: false }) {
+  if (typeof value === 'string') {
+    const normalized = normalizeGatewayAddress(value);
+    if (normalized !== value) changes.changed = true;
+    return normalized;
+  }
+  if (Array.isArray(value)) return value.map((item) => normalizeGatewayAddresses(item, changes));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, normalizeGatewayAddresses(item, changes)]));
+  }
+  return value;
+}
+
 function withUi(catalog) {
   if (!catalog || typeof catalog !== 'object') return catalog;
+  const changes = { changed: false };
+  const normalizedCatalog = normalizeGatewayAddresses(catalog, changes);
+  state.gatewayUrlsMigrated = changes.changed;
   return {
-    ...catalog,
+    ...normalizedCatalog,
+    meta: {
+      ...(normalizedCatalog.meta && typeof normalizedCatalog.meta === 'object' ? normalizedCatalog.meta : {}),
+      gatewayUrl: normalizeGatewayAddress(normalizedCatalog.meta?.gatewayUrl || ROOT_GATEWAY_URL)
+    },
     ui: {
       ...defaultUi,
-      ...(catalog.ui && typeof catalog.ui === 'object' ? catalog.ui : {})
+      ...(normalizedCatalog.ui && typeof normalizedCatalog.ui === 'object' ? normalizedCatalog.ui : {})
     }
   };
 }
@@ -236,17 +266,21 @@ function appTitle(app) {
 }
 
 function gatewayUrl() {
-  return state.catalog?.meta?.gatewayUrl || 'https://api.aikeysforyou.com';
+  return normalizeGatewayAddress(state.catalog?.meta?.gatewayUrl || ROOT_GATEWAY_URL);
 }
 
 function secureCode(value) {
   const previewKey = state.key.trim() || 'ВАШ_API_КЛЮЧ';
-  return String(value || '')
+  return normalizeGatewayAddress(String(value || ''))
     .replaceAll('{{KEY}}', previewKey)
     .replaceAll('{{BASE_URL}}', gatewayUrl())
     .replaceAll('https://api.tokenwave.ru', gatewayUrl())
     .replaceAll('http://api.tokenwave.ru', gatewayUrl())
     .replaceAll('https://api.openrouter.ai', gatewayUrl());
+}
+
+function instructionIsHidden(appId) {
+  return Boolean(state.catalog?.recipes?.[appId]?.hidden);
 }
 
 async function copy(value, trigger) {
@@ -270,7 +304,8 @@ async function copy(value, trigger) {
 }
 
 function renderAppTabs() {
-  const apps = Array.isArray(state.catalog?.apps) ? state.catalog.apps : [];
+  const allApps = Array.isArray(state.catalog?.apps) ? state.catalog.apps : [];
+  const apps = inlineEditorActive() ? allApps : allApps.filter((app) => !instructionIsHidden(app.id));
   if (!apps.some((app) => app.id === state.appId)) state.appId = apps[0]?.id || '';
   const parent = clear(elements.appTabs);
 
@@ -406,7 +441,13 @@ function renderGuide() {
   const headerCopy = document.createElement('div');
   headerCopy.append(editableNode('h3', '', appTitle(selectedApp), appPath));
   headerCopy.append(editableNode('p', '', text(recipe.intro), localizedPath(`${recipePath}.intro`, recipe.intro)));
-  header.append(headerCopy, node('span', 'guide-meta', `${uiText('forSystem', 'для')} ${text((state.catalog.oses || []).find((os) => os.id === state.osId)?.ru, state.osId)}`));
+  const headerAside = node('div', 'guide-header__aside');
+  headerAside.append(node('span', 'guide-meta', `${uiText('forSystem', 'для')} ${text((state.catalog.oses || []).find((os) => os.id === state.osId)?.ru, state.osId)}`));
+  if (inlineEditorActive()) {
+    headerAside.append(node('span', 'inline-editor-state', recipe.hidden ? 'Скрыто для посетителей' : 'Видно посетителям'));
+    appendEditorAction(headerAside, recipe.hidden ? 'Показать инструкцию' : 'Скрыть инструкцию', 'toggle-hidden', `${recipePath}.hidden`);
+  }
+  header.append(headerCopy, headerAside);
   parent.append(header);
 
   const steps = node('div', 'steps');
@@ -456,14 +497,23 @@ function allModelGroups() {
     name: text(provider.name ?? provider.ru, 'Провайдер'),
     namePath: propertyPath(`models.providers.${index}`, provider, ['name', 'ru']),
     modelsPath: `models.providers.${index}.models`,
+    hiddenPath: `models.providers.${index}.hidden`,
+    hidden: Boolean(provider.hidden),
     type: 'text',
     models: Array.isArray(provider.models) ? provider.models : []
   }));
   const singleGroups = [
-    ['Изображения', 'image', models.images, 'models.images'],
-    ['Видео', 'video', models.video, 'models.video']
+    ['Изображения', 'image', models.images, 'models.images', 'images'],
+    ['Видео', 'video', models.video, 'models.video', 'video']
   ].filter(([, , modelList]) => Array.isArray(modelList))
-    .map(([name, type, modelList, modelsPath]) => ({ name, type, models: modelList, modelsPath }));
+    .map(([name, type, modelList, modelsPath, key]) => ({
+      name,
+      type,
+      models: modelList,
+      modelsPath,
+      hiddenPath: `models.hiddenGroups.${key}`,
+      hidden: Boolean(models.hiddenGroups?.[key])
+    }));
   return [...providerGroups, ...singleGroups];
 }
 
@@ -494,15 +544,19 @@ function renderModelFilter() {
 function renderModels() {
   const parent = clear(elements.modelsGrid);
   let total = 0;
-  allModelGroups().forEach((group) => {
+  allModelGroups().filter((group) => inlineEditorActive() || !group.hidden).forEach((group) => {
     const models = group.models
       .map((model, index) => ({ model, index }))
       .filter(({ model }) => matchesModel(model, group));
     if (!models.length && !inlineEditorActive()) return;
     total += models.length;
     const card = node('article', 'provider-card');
+    card.classList.toggle('is-editor-hidden', inlineEditorActive() && group.hidden);
     const header = node('header', 'provider-card__header');
-    header.append(editableNode('h3', '', group.name, group.namePath), node('span', '', `${models.length} ${models.length === 1 ? uiText('modelOne', 'модель') : uiText('modelMany', 'моделей')}`));
+    const headerMeta = node('div', 'provider-card__meta');
+    headerMeta.append(node('span', '', `${models.length} ${models.length === 1 ? uiText('modelOne', 'модель') : uiText('modelMany', 'моделей')}`));
+    if (inlineEditorActive() && group.hidden) headerMeta.append(node('span', 'inline-editor-state', 'Скрыто'));
+    header.append(editableNode('h3', '', group.name, group.namePath), headerMeta);
     const list = node('ul', 'model-rows');
     models.forEach(({ model, index }) => {
       const modelPath = `${group.modelsPath}.${index}`;
@@ -523,6 +577,7 @@ function renderModels() {
       list.append(row);
     });
     card.append(header, list);
+    appendEditorAction(card, group.hidden ? 'Показать блок' : 'Скрыть блок', 'toggle-hidden', group.hiddenPath);
     appendEditorAction(card, '+ Модель', 'add-model', group.modelsPath, 'Добавить модель');
     parent.append(card);
   });
@@ -615,7 +670,7 @@ function renderErrors() {
 
 function setMetadata() {
   const meta = state.catalog?.meta || {};
-  const gateway = meta.gatewayUrl || 'https://api.aikeysforyou.com';
+  const gateway = normalizeGatewayAddress(meta.gatewayUrl || ROOT_GATEWAY_URL);
   elements.gateway.textContent = gateway;
   makeEditable(elements.gateway, 'meta.gatewayUrl');
   const updated = meta.updatedAt ? new Date(meta.updatedAt) : null;
@@ -721,7 +776,7 @@ async function loadSupabaseCatalog() {
       ...(row.content.meta || {}),
       source: 'supabase',
       updatedAt: row.updated_at || row.content.meta?.updatedAt || new Date().toISOString(),
-      gatewayUrl: row.content.meta?.gatewayUrl || 'https://api.aikeysforyou.com'
+      gatewayUrl: row.content.meta?.gatewayUrl || ROOT_GATEWAY_URL
     }
   };
 }
@@ -736,7 +791,7 @@ async function initialise() {
       meta: {
         source: 'local snapshot',
         updatedAt: window.__AIKEYS_CATALOG__.generatedAt || new Date().toISOString(),
-        gatewayUrl: 'https://api.aikeysforyou.com'
+        gatewayUrl: ROOT_GATEWAY_URL
       }
     });
     renderAll();
@@ -829,6 +884,12 @@ window.__AIKEYS_DOCS_APP__ = {
     state.catalog = withUi(catalog);
     renderAll();
     return true;
+  },
+  readPath(path) {
+    return readCatalogPath(path);
+  },
+  needsGatewayUrlMigration() {
+    return state.gatewayUrlsMigrated;
   },
   setInlineEditing(active) {
     window.__AIKEYS_DOCS_INLINE_EDITOR__ = { active: Boolean(active) };

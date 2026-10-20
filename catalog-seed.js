@@ -170,7 +170,7 @@ window.__AIKEYS_CATALOG__ = {
             "ru": "Скопируйте всё целиком в открывшийся пустой файл и сохраните. Ключ уже подставлен.",
             "en": "Copy all of it into the empty file that just opened and save. Your key is already filled in."
           },
-          "code": "{\n  \"env\": {\n    \"ANTHROPIC_BASE_URL\": \"https://api.aikeysforyou.com\",\n    \"ANTHROPIC_AUTH_TOKEN\": \"{{KEY}}\",\n    \"ANTHROPIC_DEFAULT_OPUS_MODEL\": \"claude-opus-5\",\n    \"ANTHROPIC_DEFAULT_SONNET_MODEL\": \"claude-sonnet-5\",\n    \"ANTHROPIC_DEFAULT_HAIKU_MODEL\": \"claude-haiku-4-5\",\n    \"CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK\": \"1\",\n    \"DISABLE_TELEMETRY\": \"1\",\n    \"DISABLE_ERROR_REPORTING\": \"1\",\n    \"DISABLE_NON_ESSENTIAL_MODEL_CALLS\": \"1\"\n  }\n}",
+          "code": "{\n  \"env\": {\n    \"ANTHROPIC_BASE_URL\": \"https://api.rootgateway.com\",\n    \"ANTHROPIC_AUTH_TOKEN\": \"{{KEY}}\",\n    \"ANTHROPIC_DEFAULT_OPUS_MODEL\": \"claude-opus-5\",\n    \"ANTHROPIC_DEFAULT_SONNET_MODEL\": \"claude-sonnet-5\",\n    \"ANTHROPIC_DEFAULT_HAIKU_MODEL\": \"claude-haiku-4-5\",\n    \"CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK\": \"1\",\n    \"DISABLE_TELEMETRY\": \"1\",\n    \"DISABLE_ERROR_REPORTING\": \"1\",\n    \"DISABLE_NON_ESSENTIAL_MODEL_CALLS\": \"1\"\n  }\n}",
           "tip": {
             "win": {
               "ru": "Блокнот может сохранить файл как settings.json.txt. В окне сохранения выберите «Тип файла: Все файлы».",
@@ -248,7 +248,7 @@ window.__AIKEYS_CATALOG__ = {
               "en": "The extension has no settings of its own — it reads the same file as the terminal version: ~/.claude/settings.json. Create it and paste this:"
             }
           },
-          "code": "{\n  \"env\": {\n    \"ANTHROPIC_BASE_URL\": \"https://api.aikeysforyou.com\",\n    \"ANTHROPIC_AUTH_TOKEN\": \"{{KEY}}\",\n    \"ANTHROPIC_DEFAULT_OPUS_MODEL\": \"claude-opus-5\",\n    \"ANTHROPIC_DEFAULT_SONNET_MODEL\": \"claude-sonnet-5\",\n    \"ANTHROPIC_DEFAULT_HAIKU_MODEL\": \"claude-haiku-4-5\",\n    \"CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK\": \"1\",\n    \"DISABLE_TELEMETRY\": \"1\",\n    \"DISABLE_ERROR_REPORTING\": \"1\",\n    \"DISABLE_NON_ESSENTIAL_MODEL_CALLS\": \"1\"\n  }\n}"
+          "code": "{\n  \"env\": {\n    \"ANTHROPIC_BASE_URL\": \"https://api.rootgateway.com\",\n    \"ANTHROPIC_AUTH_TOKEN\": \"{{KEY}}\",\n    \"ANTHROPIC_DEFAULT_OPUS_MODEL\": \"claude-opus-5\",\n    \"ANTHROPIC_DEFAULT_SONNET_MODEL\": \"claude-sonnet-5\",\n    \"ANTHROPIC_DEFAULT_HAIKU_MODEL\": \"claude-haiku-4-5\",\n    \"CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK\": \"1\",\n    \"DISABLE_TELEMETRY\": \"1\",\n    \"DISABLE_ERROR_REPORTING\": \"1\",\n    \"DISABLE_NON_ESSENTIAL_MODEL_CALLS\": \"1\"\n  }\n}"
         },
         {
           "t": {
@@ -347,7 +347,7 @@ window.__AIKEYS_CATALOG__ = {
             "ru": "Вставьте в начало файла. Ключ уже вписан в блок — переменные окружения не нужны. Если файл уже был и в нём есть строки model_provider или model — замените их этими.",
             "en": "Paste it at the top of the file. Your key is already inside the block — no environment variables needed. If the file already exists and has model_provider or model lines — replace them with these."
           },
-          "code": "model_provider = \"aikeys\"\nmodel = \"gpt-6-astra\"\n\n[model_providers.aikeys]\nname = \"Aikeys\"\nbase_url = \"https://api.aikeysforyou.com/v1\"\nwire_api = \"responses\"\nexperimental_bearer_token = \"{{KEY}}\"",
+          "code": "model_provider = \"aikeys\"\nmodel = \"gpt-6-astra\"\n\n[model_providers.aikeys]\nname = \"Aikeys\"\nbase_url = \"https://api.rootgateway.com/v1\"\nwire_api = \"responses\"\nexperimental_bearer_token = \"{{KEY}}\"",
           "tip": {
             "win": {
               "ru": "Блокнот может сохранить файл как config.toml.txt. В окне сохранения выберите «Тип файла: Все файлы».",
@@ -435,7 +435,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "Base URL",
-              "https://api.aikeysforyou.com/v1"
+              "https://api.rootgateway.com/v1"
             ],
             [
               "API Key",
@@ -551,7 +551,7 @@ window.__AIKEYS_CATALOG__ = {
             ],
             [
               "Override OpenAI Base URL",
-              "https://api.aikeysforyou.com/v1"
+              "https://api.rootgateway.com/v1"
             ]
           ]
         },
@@ -621,7 +621,7 @@ window.__AIKEYS_CATALOG__ = {
             "ru": "Впишите этот блок в раздел models. Ключ уже подставлен.",
             "en": "Put this block into the models section. Your key is already filled in."
           },
-          "code": "models:\n  - name: Aikeys Opus 5\n    provider: openai\n    model: claude-opus-5\n    apiBase: https://api.aikeysforyou.com/v1\n    apiKey: {{KEY}}\n  - name: Aikeys Haiku\n    provider: openai\n    model: claude-haiku-4-5\n    apiBase: https://api.aikeysforyou.com/v1\n    apiKey: {{KEY}}"
+          "code": "models:\n  - name: Aikeys Opus 5\n    provider: openai\n    model: claude-opus-5\n    apiBase: https://api.rootgateway.com/v1\n    apiKey: {{KEY}}\n  - name: Aikeys Haiku\n    provider: openai\n    model: claude-haiku-4-5\n    apiBase: https://api.rootgateway.com/v1\n    apiKey: {{KEY}}"
         },
         {
           "t": {
@@ -687,7 +687,7 @@ window.__AIKEYS_CATALOG__ = {
             "ru": "Сначала впишите свой ключ в поле «Ваш ключ» вверху — он подставится в блок сам. Потом вставьте блок в открывшийся файл и сохраните: Ctrl+S, на маке ⌘S, в nano — Ctrl+O, Enter, Ctrl+X. Имя aikeys не меняйте.",
             "en": "First put your key into the “Your key” field above — it fills the block in for you. Then paste the block into the open file and save: Ctrl+S, ⌘S on a Mac, Ctrl+O, Enter, Ctrl+X in nano. Keep the id aikeys."
           },
-          "code": "{\n  \"provider\": {\n    \"aikeys\": {\n      \"npm\": \"@ai-sdk/openai-compatible\",\n      \"name\": \"Aikeys\",\n      \"options\": { \"baseURL\": \"https://api.aikeysforyou.com/v1\", \"apiKey\": \"{{KEY}}\" },\n      \"models\": {\n        \"claude-haiku-4-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-opus-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-sonnet-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-fable-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-5.6-sol\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-astra\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-sol\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-luna\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-5.6-terra\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gemini-3.1-pro\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"gemini-3.7-flash\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"gemini-3.8-flash\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"deepseek-v4-pro\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 128000, \"output\": 8192 } },\n        \"gpt-5.6-luna\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } }\n      }\n    }\n  }\n}",
+          "code": "{\n  \"provider\": {\n    \"aikeys\": {\n      \"npm\": \"@ai-sdk/openai-compatible\",\n      \"name\": \"Aikeys\",\n      \"options\": { \"baseURL\": \"https://api.rootgateway.com/v1\", \"apiKey\": \"{{KEY}}\" },\n      \"models\": {\n        \"claude-haiku-4-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-opus-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-sonnet-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"claude-fable-5\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-5.6-sol\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-astra\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-sol\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-6-luna\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gpt-5.6-terra\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } },\n        \"gemini-3.1-pro\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"gemini-3.7-flash\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"gemini-3.8-flash\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 1000000, \"output\": 8192 } },\n        \"deepseek-v4-pro\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 128000, \"output\": 8192 } },\n        \"gpt-5.6-luna\": { \"attachment\": true, \"modalities\": { \"input\": [\"text\", \"image\"], \"output\": [\"text\"] }, \"limit\": { \"context\": 200000, \"output\": 8192 } }\n      }\n    }\n  }\n}",
           "tip": {
             "ru": "Видите в блоке sk-ВАШ_КЛЮЧ — ключ ещё не вписан вверху. Файл не пустой — OpenCode уже настроен: сохраните копию и допишите только блок provider, два объекта подряд сломают конфиг. Нужна другая модель — допишите такой же строкой, имена в разделе «Модели» на tokenwave.ru. Значение output выше 8192 не ставьте: шлюз резервирует ответ заранее, и на остатке пакета это даёт отказ.",
             "en": "If the block shows sk-YOUR_KEY, the key is not entered above yet. File not empty — OpenCode is already set up: keep a copy and add only the provider block; two objects in a row break it. Need another model — add it as one more line, names are under Models on tokenwave.ru. Do not raise output above 8192: the gateway reserves the answer up front, and near the end of a package that turns into a refusal."
@@ -757,9 +757,9 @@ window.__AIKEYS_CATALOG__ = {
             }
           },
           "code": {
-            "win": "$env:OPENAI_API_BASE=\"https://api.aikeysforyou.com/v1\"\n$env:OPENAI_API_KEY=\"{{KEY}}\"\naider --model openai/claude-opus-5",
-            "mac": "OPENAI_API_BASE=https://api.aikeysforyou.com/v1 \\\nOPENAI_API_KEY={{KEY}} \\\naider --model openai/claude-opus-5",
-            "linux": "OPENAI_API_BASE=https://api.aikeysforyou.com/v1 \\\nOPENAI_API_KEY={{KEY}} \\\naider --model openai/claude-opus-5"
+            "win": "$env:OPENAI_API_BASE=\"https://api.rootgateway.com/v1\"\n$env:OPENAI_API_KEY=\"{{KEY}}\"\naider --model openai/claude-opus-5",
+            "mac": "OPENAI_API_BASE=https://api.rootgateway.com/v1 \\\nOPENAI_API_KEY={{KEY}} \\\naider --model openai/claude-opus-5",
+            "linux": "OPENAI_API_BASE=https://api.rootgateway.com/v1 \\\nOPENAI_API_KEY={{KEY}} \\\naider --model openai/claude-opus-5"
           }
         }
       ],
@@ -793,7 +793,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "Base URL",
-              "https://api.aikeysforyou.com"
+              "https://api.rootgateway.com"
             ],
             [
               "API key",
@@ -851,7 +851,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "API Host / Base URL",
-              "https://api.aikeysforyou.com/v1"
+              "https://api.rootgateway.com/v1"
             ],
             [
               "API Key",
@@ -896,7 +896,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "Base URL",
-              "https://api.aikeysforyou.com/v1"
+              "https://api.rootgateway.com/v1"
             ],
             [
               "API Key",
@@ -943,7 +943,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "Endpoint",
-              "https://api.aikeysforyou.com/v1/images/generations"
+              "https://api.rootgateway.com/v1/images/generations"
             ],
             [
               "API Key",
@@ -979,9 +979,9 @@ window.__AIKEYS_CATALOG__ = {
             }
           },
           "code": {
-            "win": "import base64, json, urllib.request\n\nreq = urllib.request.Request(\n    \"https://api.aikeysforyou.com/v1/images/generations\",\n    data=json.dumps({\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\",\n                     \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}).encode(),\n    headers={\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"})\nresp = json.load(urllib.request.urlopen(req, timeout=300))\nopen(\"image.png\", \"wb\").write(base64.b64decode(resp[\"data\"][0][\"b64_json\"]))\nprint(\"готово: image.png\")",
-            "mac": "curl https://api.aikeysforyou.com/v1/images/generations \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\", \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}' \\\n  | python3 -c \"import sys, json, base64; open('image.png', 'wb').write(base64.b64decode(json.load(sys.stdin)['data'][0]['b64_json']))\"",
-            "linux": "curl https://api.aikeysforyou.com/v1/images/generations \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\", \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}' \\\n  | python3 -c \"import sys, json, base64; open('image.png', 'wb').write(base64.b64decode(json.load(sys.stdin)['data'][0]['b64_json']))\""
+            "win": "import base64, json, urllib.request\n\nreq = urllib.request.Request(\n    \"https://api.rootgateway.com/v1/images/generations\",\n    data=json.dumps({\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\",\n                     \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}).encode(),\n    headers={\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"})\nresp = json.load(urllib.request.urlopen(req, timeout=300))\nopen(\"image.png\", \"wb\").write(base64.b64decode(resp[\"data\"][0][\"b64_json\"]))\nprint(\"готово: image.png\")",
+            "mac": "curl https://api.rootgateway.com/v1/images/generations \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\", \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}' \\\n  | python3 -c \"import sys, json, base64; open('image.png', 'wb').write(base64.b64decode(json.load(sys.stdin)['data'][0]['b64_json']))\"",
+            "linux": "curl https://api.rootgateway.com/v1/images/generations \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\": \"gpt-image-2\", \"prompt\": \"flat icon of a green panda, dark background\", \"quality\": \"low\", \"size\": \"1024x1024\", \"n\": 1, \"response_format\": \"b64_json\"}' \\\n  | python3 -c \"import sys, json, base64; open('image.png', 'wb').write(base64.b64decode(json.load(sys.stdin)['data'][0]['b64_json']))\""
           }
         },
         {
@@ -1011,7 +1011,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "Endpoint",
-              "https://api.aikeysforyou.com/v1/audio/transcriptions"
+              "https://api.rootgateway.com/v1/audio/transcriptions"
             ],
             [
               "API Key",
@@ -1047,9 +1047,9 @@ window.__AIKEYS_CATALOG__ = {
             }
           },
           "code": {
-            "win": "import json, mimetypes, urllib.request, uuid\n\npath = \"voice.m4a\"                      # любой формат: mp3, m4a, ogg, wav, webm\nb = uuid.uuid4().hex\nfields = [(\"model\", \"gpt-4o-transcribe\"), (\"language\", \"ru\")]\nbody = b\"\".join((\"--%s\\r\\nContent-Disposition: form-data; name=\\\"%s\\\"\\r\\n\\r\\n%s\\r\\n\" % (b, k, v)).encode() for k, v in fields)\nbody += (\"--%s\\r\\nContent-Disposition: form-data; name=\\\"file\\\"; filename=\\\"%s\\\"\\r\\nContent-Type: %s\\r\\n\\r\\n\" % (b, path, mimetypes.guess_type(path)[0] or \"application/octet-stream\")).encode()\nbody += open(path, \"rb\").read() + (\"\\r\\n--%s--\\r\\n\" % b).encode()\nreq = urllib.request.Request(\"https://api.aikeysforyou.com/v1/audio/transcriptions\", data=body,\n    headers={\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"multipart/form-data; boundary=\" + b})\nprint(json.load(urllib.request.urlopen(req, timeout=300))[\"text\"])",
-            "mac": "curl https://api.aikeysforyou.com/v1/audio/transcriptions \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -F model=gpt-4o-transcribe \\\n  -F language=ru \\\n  -F file=@voice.m4a",
-            "linux": "curl https://api.aikeysforyou.com/v1/audio/transcriptions \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -F model=gpt-4o-transcribe \\\n  -F language=ru \\\n  -F file=@voice.m4a"
+            "win": "import json, mimetypes, urllib.request, uuid\n\npath = \"voice.m4a\"                      # любой формат: mp3, m4a, ogg, wav, webm\nb = uuid.uuid4().hex\nfields = [(\"model\", \"gpt-4o-transcribe\"), (\"language\", \"ru\")]\nbody = b\"\".join((\"--%s\\r\\nContent-Disposition: form-data; name=\\\"%s\\\"\\r\\n\\r\\n%s\\r\\n\" % (b, k, v)).encode() for k, v in fields)\nbody += (\"--%s\\r\\nContent-Disposition: form-data; name=\\\"file\\\"; filename=\\\"%s\\\"\\r\\nContent-Type: %s\\r\\n\\r\\n\" % (b, path, mimetypes.guess_type(path)[0] or \"application/octet-stream\")).encode()\nbody += open(path, \"rb\").read() + (\"\\r\\n--%s--\\r\\n\" % b).encode()\nreq = urllib.request.Request(\"https://api.rootgateway.com/v1/audio/transcriptions\", data=body,\n    headers={\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"multipart/form-data; boundary=\" + b})\nprint(json.load(urllib.request.urlopen(req, timeout=300))[\"text\"])",
+            "mac": "curl https://api.rootgateway.com/v1/audio/transcriptions \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -F model=gpt-4o-transcribe \\\n  -F language=ru \\\n  -F file=@voice.m4a",
+            "linux": "curl https://api.rootgateway.com/v1/audio/transcriptions \\\n  -H \"Authorization: Bearer {{KEY}}\" \\\n  -F model=gpt-4o-transcribe \\\n  -F language=ru \\\n  -F file=@voice.m4a"
           }
         },
         {
@@ -1079,7 +1079,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "Endpoint",
-              "https://api.aikeysforyou.com/v1/videos/generations"
+              "https://api.rootgateway.com/v1/videos/generations"
             ],
             [
               "API Key",
@@ -1103,7 +1103,7 @@ window.__AIKEYS_CATALOG__ = {
           "fields": [
             [
               "Статус",
-              "GET https://api.aikeysforyou.com/v1/videos/{request_id}"
+              "GET https://api.rootgateway.com/v1/videos/{request_id}"
             ]
           ],
           "p": {
@@ -1111,9 +1111,9 @@ window.__AIKEYS_CATALOG__ = {
             "en": "Poll every 5 seconds until status is completed — then the reply has video.url with the mp4 link. A ready Python example is below."
           },
           "code": {
-            "win": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break",
-            "mac": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break",
-            "linux": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.aikeysforyou.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break"
+            "win": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.rootgateway.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.rootgateway.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break",
+            "mac": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.rootgateway.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.rootgateway.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break",
+            "linux": "import json, time, urllib.request\n\nH = {\"Authorization\": \"Bearer {{KEY}}\", \"Content-Type\": \"application/json\"}\nbody = {\"model\": \"grok-imagine-video\", \"prompt\": \"a paper boat sailing down a rainy street, cinematic\",\n        \"duration\": 5, \"resolution\": \"480p\", \"aspect_ratio\": \"16:9\"}\n# картинка на входе (дороже): body[\"image\"] = \"data:image/png;base64,...\"\nreq = urllib.request.Request(\"https://api.rootgateway.com/v1/videos/generations\", data=json.dumps(body).encode(), headers=H)\njob = json.load(urllib.request.urlopen(req, timeout=120))\nprint(\"задача:\", job[\"request_id\"], \"списано:\", job[\"charged_tokens\"])\nwhile True:\n    time.sleep(5)\n    st = json.load(urllib.request.urlopen(urllib.request.Request(\"https://api.rootgateway.com/v1/videos/\" + job[\"request_id\"], headers=H), timeout=60))\n    print(st[\"status\"], st.get(\"progress\"))\n    if st[\"status\"] == \"completed\":\n        print(\"видео:\", st[\"video\"][\"url\"]); break\n    if st[\"status\"] in (\"failed\", \"error\"):\n        print(\"не получилось\"); break"
           }
         },
         {
@@ -1161,7 +1161,7 @@ window.__AIKEYS_CATALOG__ = {
             ],
             [
               "Base URL",
-              "https://api.aikeysforyou.com/v1"
+              "https://api.rootgateway.com/v1"
             ]
           ]
         },
@@ -1195,7 +1195,7 @@ window.__AIKEYS_CATALOG__ = {
       "symptoms": "Клиент сообщает, что ключ недействителен, хотя он вставлен верно.",
       "reason": "Программа шлёт ключ не к нам, а на сайт самой модели — DeepSeek, OpenAI и другие.",
       "fix": [
-        "В Cline, Roo Code и Kilo Code выберите провайдер OpenAI Compatible и укажите Base URL: https://api.aikeysforyou.com/v1.",
+        "В Cline, Roo Code и Kilo Code выберите провайдер OpenAI Compatible и укажите Base URL: https://api.rootgateway.com/v1.",
         "Ключ Aikeys работает только с этим адресом."
       ]
     },
